@@ -106,16 +106,21 @@ scene.add(axesHelper);
 // // 摄像机朝向坐标
 // camera.lookAt(cube.position);
 
-const clock = new THREE.Clock();
+// const clock = new THREE.Clock();
+gsap.to(group.getGroup().position, {
+  x: 2,
+  duration: 1,
+  delay: 1,
+})
 
 function animation() {
 
-  const elapsedTime = clock.getElapsedTime();
-
-  group.getGroup().rotation.y = elapsedTime;
-  group.getGroup().position.y = Math.sin(elapsedTime);
-  group.getGroup().position.x = Math.cos(elapsedTime);
-  group.getGroup().position.z = Math.cos(elapsedTime);
+  // const elapsedTime = clock.getElapsedTime();
+  //
+  // group.getGroup().rotation.y = elapsedTime;
+  // group.getGroup().position.y = Math.sin(elapsedTime);
+  // group.getGroup().position.x = Math.cos(elapsedTime);
+  // group.getGroup().position.z = Math.cos(elapsedTime);
 
   renderer.render(scene, camera);
   requestAnimationFrame(animation);

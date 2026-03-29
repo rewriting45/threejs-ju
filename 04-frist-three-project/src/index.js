@@ -53,6 +53,7 @@ function createCamera(scene, fov = 75, aspect, near, far) {
    * far: 最远距离，可以看到的最远的距离，默认2000
    */
   const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+  // const camera = new THREE.OrthographicCamera(-1 * aspect, 1 * aspect, 1, -1, 0.1, 1000);
   camera.position.z = 10;
   // 把相机添加到场景中去
 
@@ -76,43 +77,24 @@ function createAxesHelper(size = 10) {
   return new THREE.AxesHelper(size);
 }
 
-
-const group = new CreateGroup();
-group.push(createCube('red', new THREE.Vector3(1, 2, 3)));
-group.push(createCube('green', new THREE.Vector3(3, 2, 1)));
-group.push(createCube('blue', new THREE.Vector3(0, 0, 0)));
-
 const camera = createCamera(scene,75, clientWidth / clientHeight, 1, 200);
 const renderer = createRenderer(scene, camera, canvas);
+const mesh = createCube('blue', new THREE.Vector3(0, 0, 0));
 const axesHelper = createAxesHelper();
+
+camera.position.set(2, 2, 2);
+camera.lookAt(mesh.position);
+
+scene.add(mesh);
 scene.add(camera);
-scene.add(group.getGroup());
 scene.add(axesHelper);
 
-// 位置变化
-// cube.position.set(1, 1, 1);
-// // scale 缩放
-// // rotation 旋转
-// // 旋转排序
-// cube.rotation.reorder("YXZ");
-// // 向量长度,计算的应该是坐标系原点到cube中心点的距离
-// console.log(cube.position.length());
-// // 物体到指定目标的距离
-// console.log(cube.position.distanceTo(camera.position));
-// // 归一化
-// cube.position.normalize(); // 把 position 的向量长度变为1，暂时不知道有什么用
-// console.log(cube.position.length());
-//
-// // 摄像机朝向坐标
-// camera.lookAt(cube.position);
-
-gsap.to(group.getGroup().position, {
-  x: 2,
-  duration: 1,
-  delay: 1,
-})
+const clock = new THREE.Clock();
 
 function animation() {
+
+  const elapsedTime = clock.getElapsedTime();
+  mesh.rotation.y = Math.sin(elapsedTime) * 2 * Math.PI;
 
   renderer.render(scene, camera);
   requestAnimationFrame(animation);
