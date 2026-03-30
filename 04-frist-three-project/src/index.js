@@ -1,10 +1,11 @@
-import * as THREE from 'three';
-import {gsap} from "gsap";
+import * as THREE from "three";
+import { gsap } from "gsap";
+import { OrbitControls } from "three/addons";
 
 const canvas = document.querySelector("#app");
 // 获取上下文，可以理解为贯穿整个canvas的操作
 const context = canvas.getContext("3d");
-const {clientWidth, clientHeight} = canvas;
+const { clientWidth, clientHeight } = canvas;
 
 // 场景
 const scene = new THREE.Scene();
@@ -26,13 +27,25 @@ class CreateGroup {
   }
 }
 
-function createCube(color = 'red', position) {
+const cursor = {
+  x: 0,
+  y: 0,
+};
+
+function getCursor() {
+  window.addEventListener("mousemove", (event) => {
+    cursor.x = -(event.clientX / canvas.clientWidth - 0.5);
+    cursor.y = -(event.clientY / canvas.clientHeight - 0.5);
+  });
+}
+
+function createCube(color = "red", position) {
   // red cube
   // 创建一个长宽高1，1，1的立方体
   const geometry = new THREE.BoxGeometry(1, 1, 1);
   // 创建基础材质
   const material = new THREE.MeshBasicMaterial({
-    color
+    color,
   });
   // 网格模型 立方体
   const mesh = new THREE.Mesh(geometry, material);
@@ -53,8 +66,12 @@ function createCamera(scene, fov = 75, aspect, near, far) {
    * far: 最远距离，可以看到的最远的距离，默认2000
    */
   const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+  /**
+   * 创建一个正交相机 (left, right, top, bottom, near, far)
+   * 可以理解为平行投影，跟透视相机的视锥结构不一样，正交相机的视锥就是一个立方体，设置的窗口大小就是投影到你可以看见的
+   */
   // const camera = new THREE.OrthographicCamera(-1 * aspect, 1 * aspect, 1, -1, 0.1, 1000);
-  camera.position.z = 10;
+  camera.position.z = 30;
   // 把相机添加到场景中去
 
   return camera;
@@ -64,10 +81,14 @@ function createCamera(scene, fov = 75, aspect, near, far) {
 function createRenderer(scene, camera, canvas) {
   const renderer = new THREE.WebGLRenderer({
     canvas,
-    antialias: true
+    antialias: true,
   });
 
-  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+
+  console.log(window.devicePixelRatio);
+
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
   return renderer;
 }
@@ -77,9 +98,9 @@ function createAxesHelper(size = 10) {
   return new THREE.AxesHelper(size);
 }
 
-const camera = createCamera(scene,75, clientWidth / clientHeight, 1, 200);
+const camera = createCamera(scene, 75, clientWidth / clientHeight, 1, 200);
 const renderer = createRenderer(scene, camera, canvas);
-const mesh = createCube('blue', new THREE.Vector3(0, 0, 0));
+const mesh = createCube("blue", new THREE.Vector3(0, 0, 0));
 const axesHelper = createAxesHelper();
 
 camera.position.set(2, 2, 2);
@@ -89,17 +110,32 @@ scene.add(mesh);
 scene.add(camera);
 scene.add(axesHelper);
 
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+
+getCursor();
+window.addEventListener("resize", (event) => {
+  camera.aspect = canvas.clientWidth / canvas.clientHeight;
+  camera.updateProjectionMatrix();
+});
 const clock = new THREE.Clock();
 
 function animation() {
-
   const elapsedTime = clock.getElapsedTime();
   mesh.rotation.y = Math.sin(elapsedTime) * 2 * Math.PI;
+
+  // update camera
+  // camera.position.x = cursor.x * 3;
+  // camera.position.y = cursor.y * 3;
+
+  // camera.position.x = Math.sin(cursor.x * Math.PI * 2);
+  // camera.position.z = Math.cos(cursor.x * Math.PI * 2);
+
+  // camera.lookAt(mesh.position);
+  controls.update();
 
   renderer.render(scene, camera);
   requestAnimationFrame(animation);
 }
 
 animation();
-
-
