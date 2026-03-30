@@ -2,6 +2,13 @@ import * as THREE from "three";
 import { gsap } from "gsap";
 import { OrbitControls } from "three/addons";
 import { GUI } from "dat.gui";
+import ColorTexture from "@/asserts/textures/door/color.jpg";
+import AmbientOcclusionTexture from '@/asserts/textures/door/ambientOcclusion.jpg';
+import HeightTexture from '@/asserts/textures/door/height.jpg';
+import AlphaTexture from '@/asserts/textures/door/alpha.jpg';
+import MetalnessTexture from '@/asserts/textures/door/metalness.jpg';
+import NormalTexture from '@/asserts/textures/door/normal.jpg';
+import RoughnessTexture from '@/asserts/textures/door/roughness.jpg';
 
 const canvas = document.querySelector("#app");
 // 获取上下文，可以理解为贯穿整个canvas的操作
@@ -27,10 +34,20 @@ function createCube(color = "red", position) {
   // red cube
   // 创建一个长宽高1，1，1的立方体
   const geometry = new THREE.BoxGeometry(1, 1, 1);
+  // 创建纹理
+  const textureLoader = new THREE.TextureLoader();
+  const colorTexture = textureLoader.load(ColorTexture);
+  const metalnessTexture = textureLoader.load(MetalnessTexture);
+  const heightTexture = textureLoader.load(HeightTexture);
+  const alphaTexture = textureLoader.load(AlphaTexture);
+  const ambientOcclusionTexture = textureLoader.load(AmbientOcclusionTexture);
+  const normalTexture = textureLoader.load(NormalTexture);
+  const roughnessTexture = textureLoader.load(RoughnessTexture);
   // 创建基础材质
   const material = new THREE.MeshBasicMaterial({
-    color,
+    map: normalTexture,
   });
+
   // 网格模型 立方体
   const mesh = new THREE.Mesh(geometry, material);
 
@@ -93,37 +110,37 @@ const { mesh, material } = createCube("red", new THREE.Vector3(0, 0, 0));
 const axesHelper = createAxesHelper();
 const gui = createGui();
 
-const cubeFolder = gui.addFolder("cube");
-cubeFolder.add(mesh.rotation, "x", 0, Math.PI * 2).step(Math.PI / 16);
-cubeFolder.add(mesh.rotation, "y", 0, Math.PI * 2).step(Math.PI / 16);
-cubeFolder.add(mesh.rotation, "z", 0, Math.PI * 2).step(Math.PI / 16);
-cubeFolder.open();
+function guiAction() {
+  const cubeFolder = gui.addFolder("cube");
+  cubeFolder.add(mesh.rotation, "x", 0, Math.PI * 2).step(Math.PI / 16);
+  cubeFolder.add(mesh.rotation, "y", 0, Math.PI * 2).step(Math.PI / 16);
+  cubeFolder.add(mesh.rotation, "z", 0, Math.PI * 2).step(Math.PI / 16);
+  cubeFolder.open();
 
-const cameraFolder = gui.addFolder("camera");
-cameraFolder.add(camera.position, "z", 0, 10);
-cameraFolder.open();
+  const cameraFolder = gui.addFolder("camera");
+  cameraFolder.add(camera.position, "z", 0, 10);
+  cameraFolder.open();
 
-console.log(material);
+  const debugParams = {
+    color: "#ff0000",
+    spin: () => {
+      gsap.to(mesh.rotation, {
+        duration: 1,
+        y: mesh.rotation.y + Math.PI * 2,
+      });
+    },
+  };
 
-const debugParams = {
-  color: "#ff0000",
-  spin: () => {
-    gsap.to(mesh.rotation, {
-      duration: 1,
-      y: mesh.rotation.y + Math.PI * 2,
-    });
-  },
-};
-
-const materialFolder = gui.addFolder("material");
-materialFolder.add(mesh.material, "wireframe");
-materialFolder.addColor(debugParams, "color").onChange(() => {
-  material.color.set(debugParams.color);
-});
-materialFolder.open();
-const animationFolder = gui.addFolder("animation");
-animationFolder.add(debugParams, "spin");
-animationFolder.open();
+  const materialFolder = gui.addFolder("material");
+  materialFolder.add(mesh.material, "wireframe");
+  materialFolder.addColor(debugParams, "color").onChange(() => {
+    material.color.set(debugParams.color);
+  });
+  materialFolder.open();
+  const animationFolder = gui.addFolder("animation");
+  animationFolder.add(debugParams, "spin");
+  animationFolder.open();
+}
 
 camera.position.set(2, 2, 2);
 camera.lookAt(mesh.position);

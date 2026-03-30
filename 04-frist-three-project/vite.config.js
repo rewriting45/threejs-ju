@@ -1,7 +1,14 @@
+import path from 'path';
+
 export default {
   root: "./",
   publicDir: "../static/",
   base: "./",
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, 'src')
+    }
+  },
   build: {
     outDir: "../dist",
     emptyOutDir: true,
