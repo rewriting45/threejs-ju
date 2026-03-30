@@ -1,14 +1,11 @@
 import * as THREE from "three";
 import { gsap } from "gsap";
 import { OrbitControls } from "three/addons";
-import { GenerateGeometry } from "./utils/generate_geometry";
 
 const canvas = document.querySelector("#app");
 // 获取上下文，可以理解为贯穿整个canvas的操作
 const context = canvas.getContext("3d");
 const { clientWidth, clientHeight } = canvas;
-
-const genGeometry = new GenerateGeometry(THREE);
 
 // 场景
 const scene = new THREE.Scene();
@@ -28,21 +25,10 @@ function getCursor() {
 function createCube(color = "red", position) {
   // red cube
   // 创建一个长宽高1，1，1的立方体
-  // const geometry = new THREE.BoxGeometry(1, 1, 1);
-  // const geometry = genGeometry.createGeometry("box", {
-  //   width: 1,
-  //   height: 1,
-  //   depth: 1,
-  // });
-  const positionsArray = new Float32Array([0, 0, 0, 0, 1, 0, 1, 0, 0]);
-
-  const positionsAttr = new THREE.BufferAttribute(positionsArray, 3);
-  const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute("position", positionsAttr);
+  const geometry = new THREE.BoxGeometry(1, 1, 1);
   // 创建基础材质
   const material = new THREE.MeshBasicMaterial({
     color,
-    wireframe: true,
   });
   // 网格模型 立方体
   const mesh = new THREE.Mesh(geometry, material);
@@ -54,7 +40,7 @@ function createCube(color = "red", position) {
 }
 
 // 创建相机
-function createCamera(fov = 75, aspect, near, far) {
+function createCamera(scene, fov = 75, aspect, near, far) {
   /**
    * 创建一个透视相机 (fov, aspect, near, far)
    * fov: 视野，全视野范围是360度，默认50
@@ -75,7 +61,7 @@ function createCamera(fov = 75, aspect, near, far) {
 }
 
 // 创建渲染器
-function createRenderer(canvas) {
+function createRenderer(scene, camera, canvas) {
   const renderer = new THREE.WebGLRenderer({
     canvas,
     antialias: true,
@@ -93,8 +79,8 @@ function createAxesHelper(size = 10) {
   return new THREE.AxesHelper(size);
 }
 
-const camera = createCamera(75, clientWidth / clientHeight, 1, 200);
-const renderer = createRenderer(canvas);
+const camera = createCamera(scene, 75, clientWidth / clientHeight, 1, 200);
+const renderer = createRenderer(scene, camera, canvas);
 const mesh = createCube("blue", new THREE.Vector3(0, 0, 0));
 const axesHelper = createAxesHelper();
 
@@ -110,20 +96,14 @@ controls.enableDamping = true;
 
 getCursor();
 window.addEventListener("resize", (event) => {
-  canvas.width = event.target.innerWidth;
-  canvas.height = event.target.innerHeight;
-
-  camera.aspect = canvas.width / canvas.height;
+  camera.aspect = canvas.clientWidth / canvas.clientHeight;
   camera.updateProjectionMatrix();
-  renderer.setSize(canvas.width, canvas.height);
 });
 const clock = new THREE.Clock();
 
 function animation() {
   const elapsedTime = clock.getElapsedTime();
-  mesh.rotation.y = Math.sin(elapsedTime) * Math.PI;
-  mesh.rotation.x = Math.sin(elapsedTime) * Math.PI;
-  mesh.rotation.z = Math.sin(elapsedTime) * Math.PI;
+  mesh.rotation.y = Math.sin(elapsedTime) * 2 * Math.PI;
 
   controls.update();
 
