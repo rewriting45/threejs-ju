@@ -1,12 +1,14 @@
 import * as THREE from "three";
 import { gsap } from "gsap";
 import { OrbitControls } from "three/addons";
-import { GUI } from "dat.gui";
+import { GenerateGeometry } from "./utils/generate_geometry";
 
 const canvas = document.querySelector("#app");
 // 获取上下文，可以理解为贯穿整个canvas的操作
 const context = canvas.getContext("3d");
 const { clientWidth, clientHeight } = canvas;
+
+const genGeometry = new GenerateGeometry(THREE);
 
 // 场景
 const scene = new THREE.Scene();
@@ -26,10 +28,21 @@ function getCursor() {
 function createCube(color = "red", position) {
   // red cube
   // 创建一个长宽高1，1，1的立方体
-  const geometry = new THREE.BoxGeometry(1, 1, 1);
+  // const geometry = new THREE.BoxGeometry(1, 1, 1);
+  // const geometry = genGeometry.createGeometry("box", {
+  //   width: 1,
+  //   height: 1,
+  //   depth: 1,
+  // });
+  const positionsArray = new Float32Array([0, 0, 0, 0, 1, 0, 1, 0, 0]);
+
+  const positionsAttr = new THREE.BufferAttribute(positionsArray, 3);
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute("position", positionsAttr);
   // 创建基础材质
   const material = new THREE.MeshBasicMaterial({
     color,
+    wireframe: true,
   });
   // 网格模型 立方体
   const mesh = new THREE.Mesh(geometry, material);
@@ -37,14 +50,11 @@ function createCube(color = "red", position) {
   mesh.position.set(position.x, position.y, position.z);
 
   // 把之前的立方体加到场景中去
-  return {
-    mesh,
-    material,
-  };
+  return mesh;
 }
 
 // 创建相机
-function createCamera(scene, fov = 75, aspect, near, far) {
+function createCamera(fov = 75, aspect, near, far) {
   /**
    * 创建一个透视相机 (fov, aspect, near, far)
    * fov: 视野，全视野范围是360度，默认50
@@ -65,7 +75,7 @@ function createCamera(scene, fov = 75, aspect, near, far) {
 }
 
 // 创建渲染器
-function createRenderer(scene, camera, canvas) {
+function createRenderer(canvas) {
   const renderer = new THREE.WebGLRenderer({
     canvas,
     antialias: true,
@@ -83,47 +93,10 @@ function createAxesHelper(size = 10) {
   return new THREE.AxesHelper(size);
 }
 
-function createGui() {
-  return new GUI();
-}
-
-const camera = createCamera(scene, 75, clientWidth / clientHeight, 1, 200);
-const renderer = createRenderer(scene, camera, canvas);
-const { mesh, material } = createCube("red", new THREE.Vector3(0, 0, 0));
+const camera = createCamera(75, clientWidth / clientHeight, 1, 200);
+const renderer = createRenderer(canvas);
+const mesh = createCube("blue", new THREE.Vector3(0, 0, 0));
 const axesHelper = createAxesHelper();
-const gui = createGui();
-
-const cubeFolder = gui.addFolder("cube");
-cubeFolder.add(mesh.rotation, "x", 0, Math.PI * 2).step(Math.PI / 16);
-cubeFolder.add(mesh.rotation, "y", 0, Math.PI * 2).step(Math.PI / 16);
-cubeFolder.add(mesh.rotation, "z", 0, Math.PI * 2).step(Math.PI / 16);
-cubeFolder.open();
-
-const cameraFolder = gui.addFolder("camera");
-cameraFolder.add(camera.position, "z", 0, 10);
-cameraFolder.open();
-
-console.log(material);
-
-const debugParams = {
-  color: "#ff0000",
-  spin: () => {
-    gsap.to(mesh.rotation, {
-      duration: 1,
-      y: mesh.rotation.y + Math.PI * 2,
-    });
-  },
-};
-
-const materialFolder = gui.addFolder("material");
-materialFolder.add(mesh.material, "wireframe");
-materialFolder.addColor(debugParams, "color").onChange(() => {
-  material.color.set(debugParams.color);
-});
-materialFolder.open();
-const animationFolder = gui.addFolder("animation");
-animationFolder.add(debugParams, "spin");
-animationFolder.open();
 
 camera.position.set(2, 2, 2);
 camera.lookAt(mesh.position);
@@ -144,11 +117,13 @@ window.addEventListener("resize", (event) => {
   camera.updateProjectionMatrix();
   renderer.setSize(canvas.width, canvas.height);
 });
-// const clock = new THREE.Clock();
+const clock = new THREE.Clock();
 
 function animation() {
-  // const elapsedTime = clock.getElapsedTime();
-  // mesh.rotation.y = Math.sin(elapsedTime) * 2 * Math.PI;
+  const elapsedTime = clock.getElapsedTime();
+  mesh.rotation.y = Math.sin(elapsedTime) * Math.PI;
+  mesh.rotation.x = Math.sin(elapsedTime) * Math.PI;
+  mesh.rotation.z = Math.sin(elapsedTime) * Math.PI;
 
   controls.update();
 
