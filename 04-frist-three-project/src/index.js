@@ -107,6 +107,7 @@ function createAxesHelper(size = 10) {
 }
 
 function createGui() {
+  THREE.log(new GUI());
   return new GUI();
 }
 
