@@ -42,7 +42,6 @@ export function guiTextureAction(
       texture.needsUpdate = true;
     });
   // endregion
-  // “generateMipmaps” 是一个布尔值（true 或 false），它告诉图形引擎：“要不要为这张图预先生成一套‘从大到小’的缩略图系列？”
   textureFolder.add(texture, "generateMipmaps").name("MIP映射");
   textureFolder.open();
 }
