@@ -2,13 +2,16 @@ import * as THREE from "three";
 import { gsap } from "gsap";
 import { OrbitControls } from "three/addons";
 import { GUI } from "dat.gui";
+import { guiAction, guiTextureAction } from "./utils/guiActions";
 import ColorTexture from "@/asserts/textures/door/color.jpg";
-import AmbientOcclusionTexture from '@/asserts/textures/door/ambientOcclusion.jpg';
-import HeightTexture from '@/asserts/textures/door/height.jpg';
-import AlphaTexture from '@/asserts/textures/door/alpha.jpg';
-import MetalnessTexture from '@/asserts/textures/door/metalness.jpg';
-import NormalTexture from '@/asserts/textures/door/normal.jpg';
-import RoughnessTexture from '@/asserts/textures/door/roughness.jpg';
+import AmbientOcclusionTexture from "@/asserts/textures/door/ambientOcclusion.jpg";
+import HeightTexture from "@/asserts/textures/door/height.jpg";
+import AlphaTexture from "@/asserts/textures/door/alpha.jpg";
+import MetalnessTexture from "@/asserts/textures/door/metalness.jpg";
+import NormalTexture from "@/asserts/textures/door/normal.jpg";
+import RoughnessTexture from "@/asserts/textures/door/roughness.jpg";
+import ColorTextureBig from "@/asserts/textures/checkerboard-1024x1024.png";
+import MinecraftTexture from "@/asserts/textures/minecraft.png";
 
 const canvas = document.querySelector("#app");
 // 获取上下文，可以理解为贯穿整个canvas的操作
@@ -33,7 +36,7 @@ function getCursor() {
 function createCube(color = "red", position) {
   // red cube
   // 创建一个长宽高1，1，1的立方体
-  const geometry = new THREE.BoxGeometry(1, 1, 1);
+  const geometry = new THREE.BoxGeometry(3, 3, 3);
   // 创建纹理
   const textureLoader = new THREE.TextureLoader();
   const colorTexture = textureLoader.load(ColorTexture);
@@ -43,9 +46,11 @@ function createCube(color = "red", position) {
   const ambientOcclusionTexture = textureLoader.load(AmbientOcclusionTexture);
   const normalTexture = textureLoader.load(NormalTexture);
   const roughnessTexture = textureLoader.load(RoughnessTexture);
+  const colorTextureBig = textureLoader.load(ColorTextureBig);
+  const minecraftTexture = textureLoader.load(MinecraftTexture);
   // 创建基础材质
   const material = new THREE.MeshBasicMaterial({
-    map: normalTexture,
+    map: minecraftTexture,
   });
 
   // 网格模型 立方体
@@ -57,6 +62,7 @@ function createCube(color = "red", position) {
   return {
     mesh,
     material,
+    colorTexture: minecraftTexture,
   };
 }
 
@@ -101,48 +107,40 @@ function createAxesHelper(size = 10) {
 }
 
 function createGui() {
+  THREE.log(new GUI());
   return new GUI();
 }
 
 const camera = createCamera(scene, 75, clientWidth / clientHeight, 1, 200);
 const renderer = createRenderer(scene, camera, canvas);
-const { mesh, material } = createCube("red", new THREE.Vector3(0, 0, 0));
+const { mesh, material, colorTexture } = createCube(
+  "red",
+  new THREE.Vector3(0, 0, 0),
+);
 const axesHelper = createAxesHelper();
 const gui = createGui();
 
-function guiAction() {
-  const cubeFolder = gui.addFolder("cube");
-  cubeFolder.add(mesh.rotation, "x", 0, Math.PI * 2).step(Math.PI / 16);
-  cubeFolder.add(mesh.rotation, "y", 0, Math.PI * 2).step(Math.PI / 16);
-  cubeFolder.add(mesh.rotation, "z", 0, Math.PI * 2).step(Math.PI / 16);
-  cubeFolder.open();
+guiTextureAction(gui, colorTexture, {
+  wrapping: {
+    ClampToEdge: THREE.ClampToEdgeWrapping, // 默认：拉伸边缘
+    Repeat: THREE.RepeatWrapping, // 重复
+    MirroredRepeat: THREE.MirroredRepeatWrapping, // 镜像重复
+  },
+  minFilter: {
+    Nearest: THREE.NearestFilter,
+    Linear: THREE.LinearFilter,
+    NearestMipMapNearest: THREE.NearestMipMapNearestFilter,
+    NearestMipmapLinear: THREE.NearestMipmapLinearFilter,
+    LinearMipmapLinear: THREE.LinearMipmapLinearFilter,
+  },
+  magFilter: {
+    Nearest: THREE.NearestFilter,
+    Linear: THREE.LinearFilter,
+  },
+});
+guiAction(gui, mesh, camera);
 
-  const cameraFolder = gui.addFolder("camera");
-  cameraFolder.add(camera.position, "z", 0, 10);
-  cameraFolder.open();
-
-  const debugParams = {
-    color: "#ff0000",
-    spin: () => {
-      gsap.to(mesh.rotation, {
-        duration: 1,
-        y: mesh.rotation.y + Math.PI * 2,
-      });
-    },
-  };
-
-  const materialFolder = gui.addFolder("material");
-  materialFolder.add(mesh.material, "wireframe");
-  materialFolder.addColor(debugParams, "color").onChange(() => {
-    material.color.set(debugParams.color);
-  });
-  materialFolder.open();
-  const animationFolder = gui.addFolder("animation");
-  animationFolder.add(debugParams, "spin");
-  animationFolder.open();
-}
-
-camera.position.set(2, 2, 2);
+camera.position.set(10, 10, 10);
 camera.lookAt(mesh.position);
 
 scene.add(mesh);
