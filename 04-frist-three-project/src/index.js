@@ -1,8 +1,7 @@
 import * as THREE from "three";
 import { gsap } from "gsap";
+import {GUI} from "dat.gui";
 import { OrbitControls } from "three/addons";
-import { GUI } from "dat.gui";
-import { guiAction, guiTextureAction } from "./utils/guiActions";
 import ColorTexture from "@/asserts/textures/door/color.jpg";
 import AmbientOcclusionTexture from "@/asserts/textures/door/ambientOcclusion.jpg";
 import HeightTexture from "@/asserts/textures/door/height.jpg";
@@ -12,6 +11,8 @@ import NormalTexture from "@/asserts/textures/door/normal.jpg";
 import RoughnessTexture from "@/asserts/textures/door/roughness.jpg";
 import ColorTextureBig from "@/asserts/textures/checkerboard-1024x1024.png";
 import MinecraftTexture from "@/asserts/textures/minecraft.png";
+import MatcapsTexture from "@/asserts/textures/matcaps/6.png";
+import GradientsTexture from "@/asserts/textures/gradients/3.jpg";
 
 const canvas = document.querySelector("#app");
 // 获取上下文，可以理解为贯穿整个canvas的操作
@@ -36,33 +37,83 @@ function getCursor() {
 function createCube(color = "red", position) {
   // red cube
   // 创建一个长宽高1，1，1的立方体
-  const geometry = new THREE.BoxGeometry(3, 3, 3);
-  // 创建纹理
+  // const geometry = new THREE.BoxGeometry(1, 1, 1);
   const textureLoader = new THREE.TextureLoader();
-  const colorTexture = textureLoader.load(ColorTexture);
-  const metalnessTexture = textureLoader.load(MetalnessTexture);
-  const heightTexture = textureLoader.load(HeightTexture);
-  const alphaTexture = textureLoader.load(AlphaTexture);
-  const ambientOcclusionTexture = textureLoader.load(AmbientOcclusionTexture);
-  const normalTexture = textureLoader.load(NormalTexture);
-  const roughnessTexture = textureLoader.load(RoughnessTexture);
-  const colorTextureBig = textureLoader.load(ColorTextureBig);
-  const minecraftTexture = textureLoader.load(MinecraftTexture);
+
+
+  const textrues = {
+    color: textureLoader.load(ColorTexture),
+    metalness: textureLoader.load(MetalnessTexture),
+    height: textureLoader.load(HeightTexture),
+    alpha: textureLoader.load(AlphaTexture),
+    ambientOcclusion: textureLoader.load(AmbientOcclusionTexture),
+    normal: textureLoader.load(NormalTexture),
+    roughness: textureLoader.load(RoughnessTexture),
+    colorBig: textureLoader.load(ColorTextureBig),
+    minecraft: textureLoader.load(MinecraftTexture),
+    matcaps: textureLoader.load(MatcapsTexture),
+    gradients: textureLoader.load(GradientsTexture)
+  }
+
+  const sides = {
+    front: THREE.FrontSide,
+    double: THREE.DoubleSide,
+    back: THREE.BackSide
+  }
+
+  const debugParams = {
+    color: "#ff0000"
+  }
   // 创建基础材质
-  const material = new THREE.MeshBasicMaterial({
-    map: minecraftTexture,
+  // const material = new THREE.MeshBasicMaterial({
+  //   map: textrues.color,
+  //   alphaMap: textrues.alpha,
+  //   transparent: true,
+  //   color: "#ff0000"
+  // });
+
+  // 创建法线
+  // const material = new THREE.MeshNormalMaterial({
+  //   map: textrues.normal,
+  //   alphaMap: textrues.alpha,
+  //   transparent: true,
+  //   color: "#ff0000",
+  //   side: sides.double
+  // });
+
+  const material = new THREE.MeshMatcapMaterial({
+    map: textrues.matcaps,
+    transparent: true,
+
   });
 
-  // 网格模型 立方体
-  const mesh = new THREE.Mesh(geometry, material);
+  const gui = new GUI();
 
-  mesh.position.set(position.x, position.y, position.z);
+  const materialFolder = gui.addFolder('material');
+  gui.addColor(debugParams, 'color').onChange(() => {
+    material.color.set(debugParams.color);
+  }).name("颜色");
+  materialFolder.add(material, 'wireframe').name("是否网格");
+  materialFolder.add(material, 'opacity', 0, 1).name("透明度").step(0.1);
+  materialFolder.add(material, 'transparent').name("是否透明");
+  materialFolder.add(material, 'flatShading').name("平面着色");
+  materialFolder.open();
+
+  // 网格模型 立方体
+  const shape = new THREE.Mesh(new THREE.SphereGeometry(0.5, 16, 16), material);
+  const plane = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), material);
+  const torus = new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.2, 16, 32), material);
+
+
+  shape.position.set(position.x, position.y, position.z);
+  shape.position.set(position.x - 1.5, position.y, position.z);
+  torus.position.set(position.x + 1.5, position.y, position.z);
 
   // 把之前的立方体加到场景中去
   return {
-    mesh,
-    material,
-    colorTexture: minecraftTexture,
+    shape,
+    plane,
+    torus
   };
 }
 
@@ -106,44 +157,15 @@ function createAxesHelper(size = 10) {
   return new THREE.AxesHelper(size);
 }
 
-function createGui() {
-  THREE.log(new GUI());
-  return new GUI();
-}
-
 const camera = createCamera(scene, 75, clientWidth / clientHeight, 1, 200);
 const renderer = createRenderer(scene, camera, canvas);
-const { mesh, material, colorTexture } = createCube(
-  "red",
-  new THREE.Vector3(0, 0, 0),
-);
+const {shape, plane, torus} = createCube("red", new THREE.Vector3(0, 0, 0));
 const axesHelper = createAxesHelper();
-const gui = createGui();
 
-guiTextureAction(gui, colorTexture, {
-  wrapping: {
-    ClampToEdge: THREE.ClampToEdgeWrapping, // 默认：拉伸边缘
-    Repeat: THREE.RepeatWrapping, // 重复
-    MirroredRepeat: THREE.MirroredRepeatWrapping, // 镜像重复
-  },
-  minFilter: {
-    Nearest: THREE.NearestFilter,
-    Linear: THREE.LinearFilter,
-    NearestMipMapNearest: THREE.NearestMipMapNearestFilter,
-    NearestMipmapLinear: THREE.NearestMipmapLinearFilter,
-    LinearMipmapLinear: THREE.LinearMipmapLinearFilter,
-  },
-  magFilter: {
-    Nearest: THREE.NearestFilter,
-    Linear: THREE.LinearFilter,
-  },
-});
-guiAction(gui, mesh, camera);
+camera.position.set(2, 2, 2);
+camera.lookAt(shape.position);
 
-camera.position.set(10, 10, 10);
-camera.lookAt(mesh.position);
-
-scene.add(mesh);
+scene.add(shape, plane, torus);
 scene.add(camera);
 scene.add(axesHelper);
 
@@ -152,18 +174,20 @@ controls.enableDamping = true;
 
 getCursor();
 window.addEventListener("resize", (event) => {
-  canvas.width = event.target.innerWidth;
-  canvas.height = event.target.innerHeight;
-
-  camera.aspect = canvas.width / canvas.height;
+  camera.aspect = canvas.clientWidth / canvas.clientHeight;
   camera.updateProjectionMatrix();
-  renderer.setSize(canvas.width, canvas.height);
 });
-// const clock = new THREE.Clock();
-
+const clock = new THREE.Clock();
 function animation() {
-  // const elapsedTime = clock.getElapsedTime();
-  // mesh.rotation.y = Math.sin(elapsedTime) * 2 * Math.PI;
+  const elapsedTime = clock.getElapsedTime();
+
+  shape.rotation.y = 0.1 * elapsedTime;
+  plane.rotation.y = 0.1 * elapsedTime;
+  torus.rotation.y = 0.1 * elapsedTime;
+
+  shape.rotation.x = 0.15 * elapsedTime;
+  plane.rotation.x = 0.15 * elapsedTime;
+  torus.rotation.x = 0.15 * elapsedTime;
 
   controls.update();
 
