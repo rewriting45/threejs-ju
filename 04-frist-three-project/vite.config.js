@@ -1,25 +1,25 @@
-import path from 'path';
+import path from "path";
 
 export default {
   root: "./",
-  publicDir: "../static/",
+  publicDir: "static/",
   base: "./",
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, 'src')
-    }
+      "@": path.resolve(__dirname, "src"),
+    },
   },
   build: {
     outDir: "../dist",
     emptyOutDir: true,
-    sourcemap: true
+    sourcemap: true,
   },
   server: {
     port: 9000,
-    host: '0.0.0.0',
+    host: "0.0.0.0",
     hmr: {
-      protocol: 'ws',
-      host: 'localhost',
-    }
-  }
-}
+      protocol: "ws",
+      host: "localhost",
+    },
+  },
+};
