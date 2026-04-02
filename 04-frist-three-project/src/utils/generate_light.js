@@ -22,7 +22,7 @@ export class GenerateLight {
             createFn: "PointLight",
         },
         // 平面光，从一个矩形上均匀的发光，可以模拟灯条
-        reatArea: {
+        rectArea: {
             params: ["color", "intensity", "width", "height"], // 颜色，光照强度，光照宽度，光照高度
             createFn: "RectAreaLight",
         },

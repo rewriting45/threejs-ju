@@ -178,6 +178,10 @@ export class GenerateObject {
     return id ? this.materialList.get(id) : this.materialList;
   }
 
+  getRender() {
+    return this.renderer;
+  }
+
   getAllElement() {
     return {
       meshes: this.getAllMesh(),
