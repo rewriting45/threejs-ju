@@ -151,14 +151,7 @@ const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 
 getCursor();
-window.addEventListener("resize", (event) => {
-  canvas.width = event.target.innerWidth;
-  canvas.height = event.target.innerHeight;
 
-  camera.aspect = canvas.width / canvas.height;
-  camera.updateProjectionMatrix();
-  renderer.setSize(canvas.width, canvas.height);
-});
 // const clock = new THREE.Clock();
 
 function animation() {

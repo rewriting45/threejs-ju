@@ -1,7 +1,7 @@
 export class GenerateGeometry {
   THREE = null;
   geometryTypes = {
-    box: {
+    box: { // 立方体
       params: [
         "width",
         "height",
@@ -12,11 +12,11 @@ export class GenerateGeometry {
       ],
       createFn: "BoxGeometry",
     },
-    circle: {
+    circle: { // 圆形
       params: ["radius", "segments", "thetaStart", "thetaLength"],
       createFn: "CircleGeometry",
     },
-    cone: {
+    cone: { // 圆锥
       params: [
         "radius",
         "height",
@@ -28,7 +28,7 @@ export class GenerateGeometry {
       ],
       createFn: "ConeGeometry",
     },
-    cylinder: {
+    cylinder: { // 圆柱
       params: [
         "radiusTop",
         "radiusBottom",
@@ -41,7 +41,7 @@ export class GenerateGeometry {
       ],
       createFn: "CylinderGeometry",
     },
-    dodecahedron: {
+    dodecahedron: { // 十二面体
       params: ["radius", "detail"],
       createFn: "DodecahedronGeometry",
     },
@@ -53,13 +53,25 @@ export class GenerateGeometry {
       params: ["path", "tubularSegments", "radius", "radialSegments", "closed"],
       createFn: "TubeGeometry",
     },
+    torus: { // 环型
+      params: ["radius", "tube", "radialSegments", "tubularSegments", "arc"],
+      createFn: "TorusGeometry",
+    },
+    sphere: { // 球体
+      params: ["radius", "widthSegments", "heightSegments", "phiStart", "phiLength", "thetaStart", "thetaLength"],
+      createFn: "SphereGeometry",
+    },
+    plane: { // 平面
+      params: ["width", "height", "widthSegments", "heightSegments"],
+      createFn: "PlaneGeometry",
+    }
   };
 
   constructor(THREE) {
     this.THREE = THREE;
   }
 
-  createGeometry(type, params) {
+  generate(type, params) {
     const currentGeometry = this.geometryTypes[type];
 
     if (!currentGeometry) {

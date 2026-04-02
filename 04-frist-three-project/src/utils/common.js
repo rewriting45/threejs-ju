@@ -1,4 +1,5 @@
 import { GUI } from "dat.gui";
+import * as THREE from 'three';
 
 export function generateGui(name = "light", params) {
     const gui = new GUI();
@@ -45,4 +46,28 @@ export function generateGui(name = "light", params) {
         },
     );
     folder.open();
+}
+
+export function createRenderer(canvas) {
+    const renderer = new THREE.WebGLRenderer({
+        canvas,
+        antialias: true,
+    });
+
+    renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    return renderer;
+}
+
+export function renderResize(canvas, camera, renderer) {
+    window.addEventListener("resize", (event) => {
+        canvas.width = event.target.innerWidth;
+        canvas.height = event.target.innerHeight;
+
+        camera.aspect = canvas.width / canvas.height;
+        camera.updateProjectionMatrix();
+        renderer.setSize(canvas.width, canvas.height);
+    });
 }
