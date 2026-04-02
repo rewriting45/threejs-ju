@@ -38,6 +38,7 @@ const threeGlobal = new GenerateObject(THREE, canvas, {
             rotation: [0, 0, 0]
         },
         {
+            id: "meshes_02",
             params: {
                 geometryId: "geometry_plane_01",
                 materialId: "material_standard_01"
@@ -46,6 +47,7 @@ const threeGlobal = new GenerateObject(THREE, canvas, {
             rotation: [-Math.PI / 2, 0, 0]
         },
         {
+            id: "meshes_03",
             params: {
                 geometryId: "geometry_torus_01",
                 materialId: "material_standard_01"
@@ -54,6 +56,7 @@ const threeGlobal = new GenerateObject(THREE, canvas, {
             rotation: [0, 0, 0]
         },
         {
+            id: "meshes_04",
             params: {
                 geometryId: "geometry_sphere_01",
                 materialId: "material_standard_01"

@@ -29,7 +29,7 @@ export class GenerateObject {
   // region current camera
   currentCamera = null;
   // endregion
-  constructor(THREE, canvas,{generate, materials, geometrys, meshes, cameras, lights}) {
+  constructor(THREE, canvas,{materials, geometrys, meshes, cameras, lights}) {
     this.canvas = canvas;
     this.generateScene();
 
@@ -39,11 +39,12 @@ export class GenerateObject {
     this.cameraFactory = new GenerateCamera(THREE);
     this.lightFactory = new GenerateLight(THREE);
 
+    this.generateCamera(cameras);
     this.addAxesHelper(1000);
     this.generateMaterial(materials);
     this.generateGeometry(geometrys);
     this.generateMesh(meshes);
-    this.generateCamera(cameras);
+
     this.generateLight(lights);
 
     this.generateRender(canvas);
@@ -158,23 +159,23 @@ export class GenerateObject {
   }
 
   getAllMesh(id) {
-    return this.meshList;
+    return id ? this.meshList.get(id) : this.meshList;
   }
 
   getAllLight(id) {
-    return this.lightList;
+    return id ? this.lightList.get(id) : this.lightList;
   }
 
   getAllCamera(id) {
-    return this.cameraList;
+    return id ? this.cameraList.get(id) :  this.cameraList;
   }
 
   getAllGeometry(id) {
-    return this.geometryList;
+    return id ? this.geometryList.get(id) : this.geometryList;
   }
 
   getAllMaterial(id) {
-    return this.materialList;
+    return id ? this.materialList.get(id) : this.materialList;
   }
 
   getAllElement() {
