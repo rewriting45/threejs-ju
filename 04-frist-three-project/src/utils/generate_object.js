@@ -10,6 +10,8 @@ import {GenerateLight} from '@/utils/generate_light';
 export class GenerateObject {
   scene = null;
   canvas = null;
+  renderer = null;
+  control = null;
   // region factory
   meshFactory = null;
   geometryFactory = null;
@@ -17,16 +19,17 @@ export class GenerateObject {
   cameraFactory = null;
   lightFactory = null;
   // endregion
-  materialList = [];
-  geometryList = [];
-  meshList = [];
-  cameraList = [];
-  lightList = [];
-
-  elements = {
-
-  };
-  constructor(THREE, canvas,{generate, materials, geometrys, meshs, cameras, lights}) {
+  // region all element list
+  materialList = new Map();
+  geometryList = new Map();
+  meshList = new Map();
+  cameraList = new Map();
+  lightList = new Map();
+  // endregion
+  // region current camera
+  currentCamera = null;
+  // endregion
+  constructor(THREE, canvas,{generate, materials, geometrys, meshes, cameras, lights}) {
     this.canvas = canvas;
     this.generateScene();
 
@@ -39,7 +42,7 @@ export class GenerateObject {
     this.addAxesHelper(1000);
     this.generateMaterial(materials);
     this.generateGeometry(geometrys);
-    this.generateMesh(meshs);
+    this.generateMesh(meshes);
     this.generateCamera(cameras);
     this.generateLight(lights);
 
@@ -53,25 +56,25 @@ export class GenerateObject {
   }
 
   resizeRender(canvas) {
-    renderResize(canvas, this.cameraList[0], this.elements.renderer);
+    renderResize(canvas, this.currentCamera, this.renderer);
   }
 
   generateMaterial(materials) {
-    materials.forEach(({type, config}) => {
-      this.materialList.push(this.materialFactory.generate(type, config))
+    materials.forEach(({id, type, config}) => {
+      this.materialList.set(id, this.materialFactory.generate(type, config))
     })
   }
 
   generateGeometry(geometrys) {
-    geometrys.forEach(({type, config}) => {
-      this.geometryList.push(this.geometryFactory.generate(type, config))
+    geometrys.forEach(({id, type, config}) => {
+      this.geometryList.set(id, this.geometryFactory.generate(type, config));
     })
   }
 
   generateControls() {
-    const controls = new OrbitControls(this.cameraList[0], this.elements.renderer.domElement);
-    controls.enableDamping = true;
-    this.elements["controls"] = controls;
+    const control = new OrbitControls(this.currentCamera, this.renderer.domElement);
+    control.enableDamping = true;
+    this.control = control;
   }
 
   generateScene() {
@@ -80,46 +83,60 @@ export class GenerateObject {
 
   generateRender(canvas) {
     const renderer = createRenderer(canvas);
-    this.elements["renderer"] = renderer;
+    this.renderer = renderer;
   };
 
   generateCamera(cameras) {
-    cameras.forEach(({type, params, position}) => {
+    cameras.forEach(({id,type, params, position}, index) => {
       const camera = this.cameraFactory.generate(type, params);
       camera.position.set(...position);
       this.addCamera(camera);
-      this.cameraList.push(camera);
+      this.cameraList.set(id, camera)
+      // 设置第一个camera为默认相机
+      if (index === 0) {
+        this.currentCamera = camera;
+      }
     })
   }
 
-  generateMesh(meshs) {
-    meshs.forEach(({params: {geometryIndex, materialIndex}, position, rotation}) => {
+  switchCamera(id) {
+    const targetCamera = this.cameraList.get(id);
+    if (targetCamera) {
+      this.currentCamera = targetCamera;
+      this.control.object = this.currentCamera;
+      this.updateControls();
+    }
+    this.resizeRender(this.canvas);
+  }
+
+  generateMesh(meshes) {
+    meshes.forEach(({id,params: {geometryId, materialId}, position, rotation}) => {
       const mesh = this.meshFactory.generate(
-          this.geometryList[geometryIndex],
-          this.materialList[materialIndex]
+          this.geometryList.get(geometryId),
+          this.materialList.get(materialId)
       );
       mesh.position.set(...position);
       mesh.rotation.set(...rotation);
-      this.meshList.push(mesh);
+      this.meshList.set(id, mesh);
       this.addMesh(mesh);
     })
   }
 
   generateLight(lights) {
-    lights.forEach(({type, params, position}) => {
+    lights.forEach(({id,type, params, position}) => {
       const pointLight = this.lightFactory.generate(type, params);
       pointLight.position.set(...position);
       this.addLight(pointLight);
-      this.lightList.push(pointLight);
+      this.lightList.set(id, pointLight);
     })
   }
 
   updateRender() {
-    this.elements.renderer.render(this.scene, this.cameraList[0]);
+    this.renderer.render(this.scene, this.currentCamera);
   }
 
   updateControls() {
-    this.elements.controls.update();
+    this.control.update();
   }
 
   update() {
@@ -140,7 +157,33 @@ export class GenerateObject {
     return this;
   }
 
+  getAllMesh(id) {
+    return this.meshList;
+  }
+
+  getAllLight(id) {
+    return this.lightList;
+  }
+
+  getAllCamera(id) {
+    return this.cameraList;
+  }
+
+  getAllGeometry(id) {
+    return this.geometryList;
+  }
+
+  getAllMaterial(id) {
+    return this.materialList;
+  }
+
   getAllElement() {
-    return this.elements;
+    return {
+      meshes: this.getAllMesh(),
+      lights: this.getAllLight(),
+      camera: this.getAllCamera(),
+      geometry: this.getAllGeometry(),
+      materail: this.getAllMaterial(),
+    };
   }
 }

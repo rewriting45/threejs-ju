@@ -5,6 +5,7 @@ const canvas = document.querySelector('canvas');
 const threeGlobal = new GenerateObject(THREE, canvas, {
     cameras: [
         {
+            id: "camera_perspective_01",
             type: "perspective",
             params: {
                 fov: 75,
@@ -17,6 +18,7 @@ const threeGlobal = new GenerateObject(THREE, canvas, {
     ],
     lights: [
         {
+            id: "light_point_01",
             type: 'point',
             params: {
                 color: 0xffffff,
@@ -25,35 +27,36 @@ const threeGlobal = new GenerateObject(THREE, canvas, {
             position: [10, 10, 10],
         }
     ],
-    meshs: [
+    meshes: [
         {
+            id: "meshes_01",
             params: {
-                geometryIndex: 0,
-                materialIndex: 0
+                geometryId: "geometry_box_01",
+                materialId: "material_standard_01"
             },
             position: [0, 0, 0],
             rotation: [0, 0, 0]
         },
         {
             params: {
-                geometryIndex: 1,
-                materialIndex: 0
+                geometryId: "geometry_plane_01",
+                materialId: "material_standard_01"
             },
             position: [0, -3, 0],
             rotation: [-Math.PI / 2, 0, 0]
         },
         {
             params: {
-                geometryIndex: 2,
-                materialIndex: 0
+                geometryId: "geometry_torus_01",
+                materialId: "material_standard_01"
             },
             position: [-5, 0, 0],
             rotation: [0, 0, 0]
         },
         {
             params: {
-                geometryIndex: 3,
-                materialIndex: 0
+                geometryId: "geometry_sphere_01",
+                materialId: "material_standard_01"
             },
             position: [5, 0, 0],
             rotation: [0, 0, 0]
@@ -61,12 +64,14 @@ const threeGlobal = new GenerateObject(THREE, canvas, {
     ],
     materials: [
         {
+            id: 'material_standard_01',
             type: 'meshStandard',
             config: {roughness: 0.4}
         }
     ],
     geometrys: [
         {
+            id: 'geometry_box_01',
             type: 'box',
             config: {
                 width: 3,
@@ -75,6 +80,7 @@ const threeGlobal = new GenerateObject(THREE, canvas, {
             }
         },
         {
+            id: 'geometry_plane_01',
             type: 'plane',
             config: {
                 width: 100,
@@ -82,6 +88,7 @@ const threeGlobal = new GenerateObject(THREE, canvas, {
             }
         },
         {
+            id: 'geometry_torus_01',
             type: 'torus',
             config: {
                 radius: 1,
@@ -89,6 +96,7 @@ const threeGlobal = new GenerateObject(THREE, canvas, {
             }
         },
         {
+            id: 'geometry_sphere_01',
             type: 'sphere',
             config: {
                 radius: 1.5,
