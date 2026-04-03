@@ -6,12 +6,14 @@ import {GenerateMesh} from '@/utils/generate_mesh';
 import {GenerateGeometry} from '@/utils/generate_geometry';
 import {GenerateMaterial} from '@/utils/generate_material';
 import {GenerateLight} from '@/utils/generate_light';
+import Stats from 'three/addons/libs/stats.module';
 
 export class GenerateObject {
   scene = null;
   canvas = null;
   renderer = null;
   control = null;
+  stats = null;
   // region factory
   meshFactory = null;
   geometryFactory = null;
@@ -38,6 +40,8 @@ export class GenerateObject {
     this.materialFactory = new GenerateMaterial(THREE);
     this.cameraFactory = new GenerateCamera(THREE);
     this.lightFactory = new GenerateLight(THREE);
+
+    this.generateStats();
 
     this.generateCamera(cameras);
     this.addAxesHelper(1000);
@@ -132,8 +136,17 @@ export class GenerateObject {
     })
   }
 
+  generateStats() {
+    this.stats = new Stats();
+    document.body.appendChild(this.stats.domElement);
+  }
+
   updateRender() {
     this.renderer.render(this.scene, this.currentCamera);
+  }
+
+  updateStats() {
+    this.stats.update();
   }
 
   updateControls() {
@@ -143,6 +156,7 @@ export class GenerateObject {
   update() {
     this.updateControls();
     this.updateRender();
+    this.updateStats();
   }
 
   addMesh(mesh) {
@@ -180,6 +194,10 @@ export class GenerateObject {
 
   getRender() {
     return this.renderer;
+  }
+
+  getScene() {
+    return this.scene;
   }
 
   getAllElement() {

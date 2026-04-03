@@ -14,16 +14,6 @@ export function generateGui(name = "light", params) {
             range,
             step,
         }) => {
-            console.log(
-                target,
-                targetParam,
-                options,
-                optionsCallback,
-                name,
-                range,
-                step,
-            );
-
             if (range) {
                 return folder
                     .add(target, targetParam, range[0], range[1])
