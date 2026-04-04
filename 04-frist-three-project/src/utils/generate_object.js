@@ -7,6 +7,7 @@ import {GenerateGeometry} from '@/utils/generate_geometry';
 import {GenerateMaterial} from '@/utils/generate_material';
 import {GenerateLight} from '@/utils/generate_light';
 import Stats from 'three/addons/libs/stats.module';
+import {GenerateFog} from "@/utils/generate_fog";
 
 export class GenerateObject {
   scene = null;
@@ -20,6 +21,7 @@ export class GenerateObject {
   materialFactory = null;
   cameraFactory = null;
   lightFactory = null;
+  fogFactory = null;
   // endregion
   // region all element list
   materialList = new Map();
@@ -27,11 +29,12 @@ export class GenerateObject {
   meshList = new Map();
   cameraList = new Map();
   lightList = new Map();
+  fogList = new Map();
   // endregion
   // region current camera
   currentCamera = null;
   // endregion
-  constructor(THREE, canvas,{materials, geometrys, meshes, cameras, lights}) {
+  constructor(THREE, canvas,{materials, geometries, meshes, cameras, lights, fogs}) {
     this.canvas = canvas;
     this.generateScene();
 
@@ -40,14 +43,16 @@ export class GenerateObject {
     this.materialFactory = new GenerateMaterial(THREE);
     this.cameraFactory = new GenerateCamera(THREE);
     this.lightFactory = new GenerateLight(THREE);
+    this.fogFactory = new GenerateFog(THREE);
 
     this.generateStats();
 
     this.generateCamera(cameras);
     this.addAxesHelper(1000);
     this.generateMaterial(materials);
-    this.generateGeometry(geometrys);
+    this.generateGeometry(geometries);
     this.generateMesh(meshes);
+    this.generateFog(fogs);
 
     this.generateLight(lights);
 
@@ -70,8 +75,8 @@ export class GenerateObject {
     })
   }
 
-  generateGeometry(geometrys) {
-    geometrys.forEach(({id, type, config}) => {
+  generateGeometry(geometries) {
+    geometries.forEach(({id, type, config}) => {
       this.geometryList.set(id, this.geometryFactory.generate(type, config));
     })
   }
@@ -114,14 +119,24 @@ export class GenerateObject {
     this.resizeRender(this.canvas);
   }
 
+  generateFog(fogs) {
+    fogs.forEach(({id, type,config}) => {
+      const fog = this.fogFactory.generate(type,config);
+      console.log(fog)
+      this.fogList.set(id, fog);
+      this.scene.fog = fog;
+    })
+  }
+
   generateMesh(meshes) {
-    meshes.forEach(({id,params: {geometryId, materialId}, position, rotation}) => {
+    meshes.forEach(({id,params: {geometryId, materialId}, position, rotation, scale}) => {
       const mesh = this.meshFactory.generate(
           this.geometryList.get(geometryId),
           this.materialList.get(materialId)
       );
-      mesh.position.set(...position);
-      mesh.rotation.set(...rotation);
+      position && mesh.position.set(...position);
+      rotation && mesh.rotation.set(...rotation);
+      scale && mesh.scale.set(...scale);
       this.meshList.set(id, mesh);
       this.addMesh(mesh);
     })
@@ -130,7 +145,7 @@ export class GenerateObject {
   generateLight(lights) {
     lights.forEach(({id,type, params, position}) => {
       const pointLight = this.lightFactory.generate(type, params);
-      pointLight.position.set(...position);
+      position && pointLight.position.set(...position);
       this.addLight(pointLight);
       this.lightList.set(id, pointLight);
     })
@@ -192,12 +207,20 @@ export class GenerateObject {
     return id ? this.materialList.get(id) : this.materialList;
   }
 
+  getAllFog(id) {
+    return id ? this.fogList.get(id) : this.fogList;
+  }
+
   getRender() {
     return this.renderer;
   }
 
   getScene() {
     return this.scene;
+  }
+
+  clone(object) {
+    return object.clone();
   }
 
   getAllElement() {

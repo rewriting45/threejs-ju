@@ -122,7 +122,7 @@ const threeGlobal = new GenerateObject(THREE, canvas, {
             config: {roughness: 0.4, side: THREE.DoubleSide}
         }
     ],
-    geometrys: [
+    geometries: [
         {
             id: 'geometry_box_01',
             type: 'box',
