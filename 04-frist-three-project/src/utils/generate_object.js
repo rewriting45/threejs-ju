@@ -49,12 +49,12 @@ export class GenerateObject {
 
     this.generateCamera(cameras);
     this.addAxesHelper(1000);
-    this.generateMaterial(materials);
-    this.generateGeometry(geometries);
-    this.generateMesh(meshes);
-    this.generateFog(fogs);
+    materials && this.generateMaterial(materials);
+    geometries && this.generateGeometry(geometries);
+    meshes && this.generateMesh(meshes);
+    fogs && this.generateFog(fogs);
 
-    this.generateLight(lights);
+    lights && this.generateLight(lights);
 
     this.generateRender(canvas);
     this.resizeRender(canvas);
