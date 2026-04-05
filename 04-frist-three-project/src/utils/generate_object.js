@@ -34,7 +34,7 @@ export class GenerateObject {
   // region current camera
   currentCamera = null;
   // endregion
-  constructor(THREE, canvas,{materials, geometries, meshes, cameras, lights, fogs}) {
+  constructor(THREE, canvas,{materials, geometries, meshes, cameras, lights, fogs, axesHelper}) {
     this.canvas = canvas;
     this.generateScene();
 
@@ -48,7 +48,7 @@ export class GenerateObject {
     this.generateStats();
 
     this.generateCamera(cameras);
-    this.addAxesHelper(1000);
+    axesHelper && this.addAxesHelper(1000);
     materials && this.generateMaterial(materials);
     geometries && this.generateGeometry(geometries);
     meshes && this.generateMesh(meshes);
