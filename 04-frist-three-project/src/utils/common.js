@@ -44,6 +44,7 @@ export function createRenderer(canvas) {
         antialias: true,
     });
 
+
     renderer.setSize(canvas.clientWidth, canvas.clientHeight);
 
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));

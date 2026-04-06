@@ -34,7 +34,7 @@ export class GenerateObject {
   // region current camera
   currentCamera = null;
   // endregion
-  constructor(THREE, canvas,{materials, geometries, meshes, cameras, lights, fogs, axesHelper}) {
+  constructor(THREE, canvas,{materials, geometries, meshes, cameras, lights, fogs, axesHelper, controls}) {
     this.canvas = canvas;
     this.generateScene();
 
@@ -58,7 +58,7 @@ export class GenerateObject {
 
     this.generateRender(canvas);
     this.resizeRender(canvas);
-    this.generateControls();
+    controls && this.generateControls();
   }
 
   addAxesHelper(size = 10) {
@@ -169,7 +169,7 @@ export class GenerateObject {
   }
 
   update() {
-    this.updateControls();
+    this.control && this.updateControls();
     this.updateRender();
     this.updateStats();
   }

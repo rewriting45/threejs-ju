@@ -57,6 +57,10 @@ export class GenerateGeometry {
       params: ["radius", "tube", "radialSegments", "tubularSegments", "arc"],
       createFn: "TorusGeometry",
     },
+    torusKnot: {
+      params: ["radius", "tube", "tubularSegments", "radialSegments", "p", "q"],
+      createFn: "TorusKnotGeometry",
+    },
     sphere: { // 球体
       params: ["radius", "widthSegments", "heightSegments", "phiStart", "phiLength", "thetaStart", "thetaLength"],
       createFn: "SphereGeometry",
