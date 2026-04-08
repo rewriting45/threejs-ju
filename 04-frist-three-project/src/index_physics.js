@@ -132,6 +132,8 @@ const sphereBody = new CANNON.Body({
     shape: sphere
 });
 
+sphereBody.applyLocalForce(new CANNON.Vec3(150, 0, 0),new CANNON.Vec3(0,0,0))
+
 const floor = new CANNON.Plane();
 const floorBody = new CANNON.Body({
     mass: 0,
@@ -155,6 +157,8 @@ function animation() {
     const elapsedTime = clock.getElapsedTime();
     const delta = elapsedTime - oldElapsedTime;
     oldElapsedTime = elapsedTime;
+
+    sphereBody.applyForce(new CANNON.Vec3(-0.5, 0, 0), sphereBody.position)
 
     world.step(1 / 60, delta, 3);
 
