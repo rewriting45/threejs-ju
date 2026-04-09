@@ -4,6 +4,7 @@ import CANNON from "cannon";
 
 const canvas = document.querySelector('canvas');
 const threeGlobal = new GenerateObject(THREE, canvas, {
+    basicPhysics: {},
     cameras: [
         {
             id: "camera_perspective_01",
@@ -30,40 +31,24 @@ const threeGlobal = new GenerateObject(THREE, canvas, {
     ],
     meshes: [
         {
-            id: "meshes_01",
-            params: {
-                geometryId: "geometry_box_01",
-                materialId: "material_standard_01"
-            },
-            position: [0, 0, 0],
-            rotation: [0, 0, 0]
-        },
-        {
             id: "meshes_02",
             params: {
                 geometryId: "geometry_plane_01",
-                materialId: "material_standard_01"
+                materialId: "material_standard_01",
+                physicsId: "physics_plane_01",
             },
             position: [0, -3, 0],
             rotation: [-Math.PI / 2, 0, 0]
         },
         {
-            id: "meshes_03",
-            params: {
-                geometryId: "geometry_torus_01",
-                materialId: "material_standard_01"
-            },
-            position: [-5, 0, 0],
-            rotation: [0, 0, 0]
-        },
-        {
             id: "meshes_04",
             params: {
                 geometryId: "geometry_sphere_01",
-                materialId: "material_standard_01"
+                materialId: "material_standard_01",
+                physicsId: "physics_sphere_01",
             },
             position: [5, 0, 0],
-            rotation: [0, 0, 0]
+            rotation: [0, 0, 0],
         }
     ],
     materials: [
@@ -107,47 +92,22 @@ const threeGlobal = new GenerateObject(THREE, canvas, {
             }
         }
     ],
+    physics: [
+        {
+            id: "physics_sphere_01",
+            config: {
+                mass: 1
+            }
+        },
+        {
+            id: "physics_plane_01",
+            config: {
+                mass: 0
+            }
+        }
+    ],
     controls: true
 });
-const meshes_04 = threeGlobal.getAllMesh("meshes_04");
-
-const world = new CANNON.World();
-world.gravity.set(0, -9.82, 0);
-
-
-// 混凝土
-const defaultMaterial = new CANNON.Material("default");
-
-const defaultContactMaterial = new CANNON.ContactMaterial(defaultMaterial, defaultMaterial, {
-    friction: 0.1,
-    restitution: 0.7
-});
-
-world.defaultContactMaterial = defaultContactMaterial;
-
-const sphere = new CANNON.Sphere(0.5);
-const sphereBody = new CANNON.Body({
-    mass: 1, // 质量
-    position: new CANNON.Vec3(0, 3, 3),
-    shape: sphere
-});
-
-sphereBody.applyLocalForce(new CANNON.Vec3(150, 0, 0),new CANNON.Vec3(0,0,0))
-
-const floor = new CANNON.Plane();
-const floorBody = new CANNON.Body({
-    mass: 0,
-    position: new CANNON.Vec3(0, -3, 0),
-    shape: floor
-});
-floorBody.quaternion.setFromAxisAngle(
-    new CANNON.Vec3(-1, 0, 0),
-    Math.PI / 2
-);
-world.addContactMaterial(defaultContactMaterial);
-world.addBody(sphereBody);
-world.addBody(floorBody);
-
 
 const clock = new THREE.Clock();
 let oldElapsedTime = 0;
@@ -158,11 +118,8 @@ function animation() {
     const delta = elapsedTime - oldElapsedTime;
     oldElapsedTime = elapsedTime;
 
-    sphereBody.applyForce(new CANNON.Vec3(-0.5, 0, 0), sphereBody.position)
-
-    world.step(1 / 60, delta, 3);
-
-    meshes_04.position.copy(sphereBody.position);
+    threeGlobal.updateWorld(delta);
+    threeGlobal.updateMeshPhysics("meshes_04");
 
     threeGlobal.update();
     requestAnimationFrame(animation);

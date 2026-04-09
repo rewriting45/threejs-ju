@@ -8,6 +8,8 @@ import {GenerateMaterial} from '@/utils/generate_material';
 import {GenerateLight} from '@/utils/generate_light';
 import Stats from 'three/addons/libs/stats.module';
 import {GenerateFog} from "@/utils/generate_fog";
+import {GeneratePhysics} from "@/utils/generate_physics";
+
 
 export class GenerateObject {
   scene = null;
@@ -22,6 +24,7 @@ export class GenerateObject {
   cameraFactory = null;
   lightFactory = null;
   fogFactory = null;
+  worldFactory = null;
   // endregion
   // region all element list
   materialList = new Map();
@@ -30,11 +33,13 @@ export class GenerateObject {
   cameraList = new Map();
   lightList = new Map();
   fogList = new Map();
+  worldMeshList = new Map();
+  physicsList = new Map();
   // endregion
   // region current camera
   currentCamera = null;
   // endregion
-  constructor(THREE, canvas,{materials, geometries, meshes, cameras, lights, fogs, axesHelper, controls}) {
+  constructor(THREE, canvas,{materials, geometries, meshes, cameras, lights, fogs, axesHelper,basicPhysics, controls, physics}) {
     this.canvas = canvas;
     this.generateScene();
 
@@ -44,20 +49,23 @@ export class GenerateObject {
     this.cameraFactory = new GenerateCamera(THREE);
     this.lightFactory = new GenerateLight(THREE);
     this.fogFactory = new GenerateFog(THREE);
+    this.worldFactory = new GeneratePhysics(basicPhysics);
 
     this.generateStats();
 
     this.generateCamera(cameras);
+    physics && this.generateWorldMeshes(physics);
     axesHelper && this.addAxesHelper(1000);
     materials && this.generateMaterial(materials);
     geometries && this.generateGeometry(geometries);
-    meshes && this.generateMesh(meshes);
+    meshes && this.generateMeshes(meshes);
     fogs && this.generateFog(fogs);
 
     lights && this.generateLight(lights);
 
     this.generateRender(canvas);
     this.resizeRender(canvas);
+
     controls && this.generateControls();
   }
 
@@ -128,18 +136,45 @@ export class GenerateObject {
     })
   }
 
-  generateMesh(meshes) {
-    meshes.forEach(({id,params: {geometryId, materialId}, position, rotation, scale}) => {
-      const mesh = this.meshFactory.generate(
-          this.geometryList.get(geometryId),
-          this.materialList.get(materialId)
-      );
-      position && mesh.position.set(...position);
-      rotation && mesh.rotation.set(...rotation);
-      scale && mesh.scale.set(...scale);
-      this.meshList.set(id, mesh);
+  generateMeshes(meshes) {
+    meshes.forEach((params) => {
+      const mesh = this.generateMesh(params);
       this.addMesh(mesh);
     })
+  }
+
+  generateMesh({id, params:{geometryId, materialId, physicsId}, position, rotation, scale}) {
+    const geometry = this.geometryList.get(geometryId);
+    const mesh = this.meshFactory.generate(
+        geometry,
+        this.materialList.get(materialId)
+    );
+    position && mesh.position.set(...position);
+    rotation && mesh.rotation.set(...rotation);
+    scale && mesh.scale.set(...scale);
+    this.meshList.set(id, mesh);
+
+    if (physicsId) {
+      const config = this.worldMeshList.get(physicsId);
+      const physics = this.worldFactory.generateMesh(geometry.otherConfig.type, {
+        ...geometry.otherConfig,
+        ...config,
+        position,
+        quaternion:mesh.quaternion
+      });
+      this.physicsList.set(id, physics);
+    }
+    return mesh;
+  }
+
+  generateWorldMeshes(meshes) {
+    meshes.forEach(item => {
+      this.generateWorldMesh(item);
+    });
+  }
+
+  generateWorldMesh({id, config}) {
+    this.worldMeshList.set(id, config);
   }
 
   generateLight(lights) {
@@ -154,6 +189,16 @@ export class GenerateObject {
   generateStats() {
     this.stats = new Stats();
     document.body.appendChild(this.stats.domElement);
+  }
+
+  updateMeshPhysics(id) {
+    const mesh = this.meshList.get(id);
+    const physics = this.physicsList.get(id);
+    mesh.position.copy(physics.position);
+  }
+
+  updateWorld(delta, dt, maxSubSteps) {
+    this.worldFactory.worldStep(delta);
   }
 
   updateRender() {

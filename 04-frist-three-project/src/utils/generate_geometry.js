@@ -96,6 +96,12 @@ export class GenerateGeometry {
       typeof params[item] === "number" ? params[item] : undefined,
     );
 
-    return new GeometryConstructor(...currentParams);
+    const geometry = new GeometryConstructor(...currentParams)
+    geometry.otherConfig = {
+      ...params,
+      type
+    };
+
+    return geometry;
   }
 }
