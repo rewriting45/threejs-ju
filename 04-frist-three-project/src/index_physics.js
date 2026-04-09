@@ -49,6 +49,16 @@ const threeGlobal = new GenerateObject(THREE, canvas, {
             },
             position: [5, 0, 0],
             rotation: [0, 0, 0],
+        },
+        {
+            id: "meshes_05",
+            params: {
+                geometryId: "geometry_box_01",
+                materialId: "material_standard_01",
+                physicsId: "physics_box_01",
+            },
+            position: [5, 0, 0],
+            rotation: [0, 0, 0],
         }
     ],
     materials: [
@@ -104,6 +114,12 @@ const threeGlobal = new GenerateObject(THREE, canvas, {
             config: {
                 mass: 0
             }
+        },
+        {
+            id: "physics_box_01",
+            config: {
+                mass: 1
+            }
         }
     ],
     controls: true
@@ -120,6 +136,7 @@ function animation() {
 
     threeGlobal.updateWorld(delta);
     threeGlobal.updateMeshPhysics("meshes_04");
+    threeGlobal.updateMeshPhysics("meshes_05");
 
     threeGlobal.update();
     requestAnimationFrame(animation);

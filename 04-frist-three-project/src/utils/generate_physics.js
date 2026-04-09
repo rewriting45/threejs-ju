@@ -48,8 +48,13 @@ export class GeneratePhysics {
 
     generateMesh(type, config) {
         const {params, createFn, bodyParams} = this.types[type];
-        const paramsValues = params.forEach(item => {
-            return config[item];
+        let paramsValues = null;
+        params.forEach(item => {
+            if (item === "halfExtents") {
+                paramsValues = new CANNON.Vec3(...config.halfExtents);
+            } else {
+                paramsValues = config[item];
+            }
         });
         const bodyParamsValues = bodyParams.reduce((prev, next) => {
             if (next === "position") {
@@ -57,7 +62,6 @@ export class GeneratePhysics {
             } else {
                 prev[next] = config[next];
             }
-
             return prev;
         }, {})
         bodyParamsValues.shape = new CANNON[createFn](paramsValues);

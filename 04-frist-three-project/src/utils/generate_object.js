@@ -155,13 +155,18 @@ export class GenerateObject {
     this.meshList.set(id, mesh);
 
     if (physicsId) {
-      const config = this.worldMeshList.get(physicsId);
-      const physics = this.worldFactory.generateMesh(geometry.otherConfig.type, {
+      const {type} = geometry.otherConfig;
+      const config = {
         ...geometry.otherConfig,
-        ...config,
+        ...this.worldMeshList.get(physicsId),
         position,
-        quaternion:mesh.quaternion
-      });
+        quaternion:mesh.quaternion,
+      };
+      if (type === "box") {
+        config.halfExtents = [geometry.otherConfig.width * 0.5, geometry.otherConfig.height * 0.5, geometry.otherConfig.depth * 0.5]
+      }
+
+      const physics = this.worldFactory.generateMesh(type,config);
       this.physicsList.set(id, physics);
     }
     return mesh;
@@ -195,6 +200,7 @@ export class GenerateObject {
     const mesh = this.meshList.get(id);
     const physics = this.physicsList.get(id);
     mesh.position.copy(physics.position);
+    mesh.quaternion.copy(physics.quaternion);
   }
 
   updateWorld(delta, dt, maxSubSteps) {
