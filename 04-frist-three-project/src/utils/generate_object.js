@@ -1,4 +1,4 @@
-import {OrbitControls} from 'three/addons';
+import {OrbitControls, GLTFLoader} from 'three/addons';
 import * as THREE from 'three';
 import {createRenderer, renderResize} from '@/utils/common';
 import {GenerateCamera} from '@/utils/generate_camera';
@@ -9,6 +9,7 @@ import {GenerateLight} from '@/utils/generate_light';
 import Stats from 'three/addons/libs/stats.module';
 import {GenerateFog} from "@/utils/generate_fog";
 import {GeneratePhysics} from "@/utils/generate_physics";
+
 
 
 export class GenerateObject {
@@ -40,7 +41,7 @@ export class GenerateObject {
   // region current camera
   currentCamera = null;
   // endregion
-  constructor(THREE, canvas,{materials, geometries, meshes, cameras, lights, fogs, axesHelper,basicPhysics, controls, physics, audios}) {
+  constructor(THREE, canvas,{materials, geometries, meshes, cameras, lights, fogs, axesHelper,basicPhysics, controls, physics, audios, models}) {
     this.canvas = canvas;
     this.generateScene();
 
@@ -55,6 +56,7 @@ export class GenerateObject {
     this.generateStats();
 
     this.generateCamera(cameras);
+    models && this.generateModels(models);
     audios && this.generateAudioList(audios);
     physics && this.generateWorldMeshes(physics);
     axesHelper && this.addAxesHelper(1000);
@@ -77,6 +79,23 @@ export class GenerateObject {
 
   resizeRender(canvas) {
     renderResize(canvas, this.currentCamera, this.renderer);
+  }
+
+  generateModels(models) {
+    models.forEach(model => {
+      this.generateModelGltf(model);
+    })
+  }
+
+  async generateModelGltf({id, url}) {
+    const gltfLoader = new GLTFLoader();
+    gltfLoader.load(url, (gltf) => {
+      console.log("load", gltf);
+    }, () => {
+      console.log("progress");
+    }, () => {
+      console.log("error");
+    });
   }
 
   generateMaterial(materials) {
