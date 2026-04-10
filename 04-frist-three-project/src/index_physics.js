@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import {GenerateObject} from '@/utils/generate_object';
-import CANNON from "cannon";
+import {GUI} from 'dat.gui';
+import {nanoid} from 'nanoid';
+
 
 const canvas = document.querySelector('canvas');
 const threeGlobal = new GenerateObject(THREE, canvas, {
@@ -27,7 +29,16 @@ const threeGlobal = new GenerateObject(THREE, canvas, {
                 intensity: 100,
             },
             position: [10, 10, 10],
-        }
+        },
+        {
+            id: "light_ambient_01",
+            type: 'ambient',
+            params: {
+                color: 0xffffff,
+                intensity: 1,
+            },
+            position: [10, -10, 10],
+        },
     ],
     meshes: [
         {
@@ -125,6 +136,41 @@ const threeGlobal = new GenerateObject(THREE, canvas, {
     controls: true
 });
 
+
+const meshIds = [];
+const meshObj = {
+    createBox: () => {
+        const id = nanoid();
+        const { random, PI } = Math;
+        const mesh = threeGlobal.generateMesh({
+            id,
+            params: {
+                // geometryId: "geometry_box_01",
+                materialId: "material_standard_01",
+                physicsId: "physics_box_01",
+                geometry: {
+                    id,
+                    type: 'box',
+                    config: {
+                        width: Math.random() * 5,
+                        height: Math.random() * 5,
+                        depth: Math.random() * 5
+                    }
+                }
+            },
+            position: [(random() - 0.5) * 20, 10 , (random() - 0.5) * 20],
+        });
+        threeGlobal.addMesh(mesh);
+        meshIds.push(id);
+    }
+};
+
+const gui = new GUI();
+gui.add(meshObj, "createBox");
+
+
+
+
 const clock = new THREE.Clock();
 let oldElapsedTime = 0;
 
@@ -137,6 +183,8 @@ function animation() {
     threeGlobal.updateWorld(delta);
     threeGlobal.updateMeshPhysics("meshes_04");
     threeGlobal.updateMeshPhysics("meshes_05");
+
+    threeGlobal.updateMeshPhysicsByIds(meshIds);
 
     threeGlobal.update();
     requestAnimationFrame(animation);

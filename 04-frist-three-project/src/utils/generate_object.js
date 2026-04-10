@@ -57,7 +57,7 @@ export class GenerateObject {
     physics && this.generateWorldMeshes(physics);
     axesHelper && this.addAxesHelper(1000);
     materials && this.generateMaterial(materials);
-    geometries && this.generateGeometry(geometries);
+    geometries && this.generateGeometries(geometries);
     meshes && this.generateMeshes(meshes);
     fogs && this.generateFog(fogs);
 
@@ -83,9 +83,15 @@ export class GenerateObject {
     })
   }
 
-  generateGeometry(geometries) {
-    geometries.forEach(({id, type, config}) => {
-      this.geometryList.set(id, this.geometryFactory.generate(type, config));
+  generateGeometry({id, type, config}) {
+    const geometry = this.geometryFactory.generate(type, config);
+    this.geometryList.set(id, geometry);
+    return geometry;
+  }
+
+  generateGeometries(geometries) {
+    geometries.forEach((geometry) => {
+      this.generateGeometry(geometry);
     })
   }
 
@@ -143,8 +149,8 @@ export class GenerateObject {
     })
   }
 
-  generateMesh({id, params:{geometryId, materialId, physicsId}, position, rotation, scale}) {
-    const geometry = this.geometryList.get(geometryId);
+  generateMesh({id, params:{geometryId, materialId, physicsId, geometry: geometryConfig}, position, rotation, scale}) {
+    const geometry = geometryId ? this.geometryList.get(geometryId) : this.generateGeometry(geometryConfig);
     const mesh = this.meshFactory.generate(
         geometry,
         this.materialList.get(materialId)
@@ -165,7 +171,6 @@ export class GenerateObject {
       if (type === "box") {
         config.halfExtents = [geometry.otherConfig.width * 0.5, geometry.otherConfig.height * 0.5, geometry.otherConfig.depth * 0.5]
       }
-
       const physics = this.worldFactory.generateMesh(type,config);
       this.physicsList.set(id, physics);
     }
@@ -201,6 +206,10 @@ export class GenerateObject {
     const physics = this.physicsList.get(id);
     mesh.position.copy(physics.position);
     mesh.quaternion.copy(physics.quaternion);
+  }
+
+  updateMeshPhysicsByIds(ids) {
+    ids.forEach(id => this.updateMeshPhysics(id));
   }
 
   updateWorld(delta, dt, maxSubSteps) {
