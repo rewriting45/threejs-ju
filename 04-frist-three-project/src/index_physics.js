@@ -6,6 +6,12 @@ import {nanoid} from 'nanoid';
 
 const canvas = document.querySelector('canvas');
 const threeGlobal = new GenerateObject(THREE, canvas, {
+    audios: [
+        {
+            id: "audio_01",
+            url: "/sounds/hit.mp3"
+        }
+    ],
     basicPhysics: {},
     cameras: [
         {
@@ -156,7 +162,8 @@ const meshObj = {
                         height: Math.random() * 5,
                         depth: Math.random() * 5
                     }
-                }
+                },
+                audioId: "audio_01"
             },
             position: [(random() - 0.5) * 20, 10 , (random() - 0.5) * 20],
         });

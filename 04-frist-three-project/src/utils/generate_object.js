@@ -35,11 +35,12 @@ export class GenerateObject {
   fogList = new Map();
   worldMeshList = new Map();
   physicsList = new Map();
+  audioList = new Map();
   // endregion
   // region current camera
   currentCamera = null;
   // endregion
-  constructor(THREE, canvas,{materials, geometries, meshes, cameras, lights, fogs, axesHelper,basicPhysics, controls, physics}) {
+  constructor(THREE, canvas,{materials, geometries, meshes, cameras, lights, fogs, axesHelper,basicPhysics, controls, physics, audios}) {
     this.canvas = canvas;
     this.generateScene();
 
@@ -54,6 +55,7 @@ export class GenerateObject {
     this.generateStats();
 
     this.generateCamera(cameras);
+    audios && this.generateAudioList(audios);
     physics && this.generateWorldMeshes(physics);
     axesHelper && this.addAxesHelper(1000);
     materials && this.generateMaterial(materials);
@@ -133,6 +135,19 @@ export class GenerateObject {
     this.resizeRender(this.canvas);
   }
 
+  generateAudioList(audios) {
+    audios.forEach(audio => this.generateAudio(audio));
+  }
+
+  generateAudio({id, url}) {
+    const audio = new Audio(url);
+    this.audioList.set(id, audio);
+  }
+
+  playAudio(id) {
+    this.audioList.get(id)?.play();
+  }
+
   generateFog(fogs) {
     fogs.forEach(({id, type,config}) => {
       const fog = this.fogFactory.generate(type,config);
@@ -149,7 +164,7 @@ export class GenerateObject {
     })
   }
 
-  generateMesh({id, params:{geometryId, materialId, physicsId, geometry: geometryConfig}, position, rotation, scale}) {
+  generateMesh({id, params:{geometryId, materialId, physicsId, geometry: geometryConfig, audioId}, position, rotation, scale}) {
     const geometry = geometryId ? this.geometryList.get(geometryId) : this.generateGeometry(geometryConfig);
     const mesh = this.meshFactory.generate(
         geometry,
@@ -172,6 +187,12 @@ export class GenerateObject {
         config.halfExtents = [geometry.otherConfig.width * 0.5, geometry.otherConfig.height * 0.5, geometry.otherConfig.depth * 0.5]
       }
       const physics = this.worldFactory.generateMesh(type,config);
+      physics.addEventListener("collide", (collision) => {
+        const impactVelocityAlongNormal = collision.contact.getImpactVelocityAlongNormal();
+        if (Math.abs(impactVelocityAlongNormal) > 10) {
+          audioId && this.playAudio(audioId);
+        }
+      })
       this.physicsList.set(id, physics);
     }
     return mesh;
