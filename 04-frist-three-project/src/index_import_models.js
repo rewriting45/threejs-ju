@@ -26,7 +26,16 @@ const threeGlobal = new GenerateObject(THREE, canvas, {
                 intensity: 100,
             },
             position: [10, 10, 10],
-        }
+        },
+        {
+            id: "light_ambient_01",
+            type: 'ambient',
+            params: {
+                color: 0xffffff,
+                intensity: 1,
+            },
+            position: [10, -10, 10],
+        },
     ],
     meshes: [
         {
@@ -44,7 +53,7 @@ const threeGlobal = new GenerateObject(THREE, canvas, {
                 geometryId: "geometry_plane_01",
                 materialId: "material_standard_01"
             },
-            position: [0, -3, 0],
+            position: [0, 0, 0],
             rotation: [-Math.PI / 2, 0, 0]
         },
         {
@@ -109,15 +118,83 @@ const threeGlobal = new GenerateObject(THREE, canvas, {
     ],
     models: [
         {
-            id: "duck",
-            url: "/models/Duck/glTF/Duck.gltf"
+            id: "duck_01",
+            url: "/models/Duck/glTF/Duck.gltf",
+            type: "gltf",
+            position: {
+                x: 10,
+                y: 0,
+                z: 5
+            }
+        },
+        {
+            id: "duck_02",
+            url: "/models/Duck/glTF-Binary/Duck.glb",
+            type: "binary",
+            position: {
+                x: 5,
+                y: 0,
+                z: 5
+            }
+        },
+        {
+            id: "duck_03",
+            url: "/models/Duck/glTF-Embedded/Duck.gltf",
+            type: "embedded",
+            position: {
+                x: 0,
+                y: 0,
+                z: 5
+            }
+        },
+        {
+            id: "duck_04",
+            url: "/models/Duck/glTF-Draco/Duck.gltf",
+            type: "draco",
+            position: {
+                x: -5,
+                y: 0,
+                z: 5
+            }
+        },
+        {
+            id: "flight_helmet_01",
+            url: "/models/FlightHelmet/glTF/FlightHelmet.gltf",
+            type: "gltf",
+            position: {
+                x: 2,
+                y: 0,
+                z: 5
+            }
+        },
+        {
+            id: "fox_01",
+            url: "/models/Fox/glTF/Fox.gltf",
+            type: "gltf",
+            position: {
+                x: -10,
+                y: 0,
+                z: 5
+            },
+            scale:{
+                x: 0.025,
+                y: 0.025,
+                z: 0.025
+            }
         }
     ],
     controls: true
 });
 
+const clock = new THREE.Clock();
+let oldElapsedTime = 0;
+
 function animation() {
 
+    const elapsedTime = clock.getElapsedTime();
+    const delta = elapsedTime - oldElapsedTime;
+    oldElapsedTime = elapsedTime;
+    threeGlobal.updateMixerList(delta);
     threeGlobal.update();
     requestAnimationFrame(animation);
 }

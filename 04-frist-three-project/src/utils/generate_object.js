@@ -1,4 +1,4 @@
-import {OrbitControls, GLTFLoader} from 'three/addons';
+import {OrbitControls, GLTFLoader, DRACOLoader} from 'three/addons';
 import * as THREE from 'three';
 import {createRenderer, renderResize} from '@/utils/common';
 import {GenerateCamera} from '@/utils/generate_camera';
@@ -9,6 +9,7 @@ import {GenerateLight} from '@/utils/generate_light';
 import Stats from 'three/addons/libs/stats.module';
 import {GenerateFog} from "@/utils/generate_fog";
 import {GeneratePhysics} from "@/utils/generate_physics";
+import {mix} from "three/tsl";
 
 
 
@@ -37,6 +38,7 @@ export class GenerateObject {
   worldMeshList = new Map();
   physicsList = new Map();
   audioList = new Map();
+  mixerList = new Map();
   // endregion
   // region current camera
   currentCamera = null;
@@ -87,14 +89,33 @@ export class GenerateObject {
     })
   }
 
-  async generateModelGltf({id, url}) {
+  async generateModelGltf({id, url, position, scale, type}) {
     const gltfLoader = new GLTFLoader();
+    if (type === "draco") {
+      const dracoLoader = new DRACOLoader();
+      dracoLoader.setDecoderPath("/draco/");
+      gltfLoader.setDRACOLoader(dracoLoader);
+    }
     gltfLoader.load(url, (gltf) => {
-      console.log("load", gltf);
+      if (gltf.animations.length > 0) {
+        const mixer = new THREE.AnimationMixer(gltf.scene);
+        const action = mixer.clipAction(gltf.animations[1]);
+        action.play();
+        this.mixerList.set(id, mixer);
+      }
+      // 因为每移动一个mesh，他就会从之前的scene移除
+      const group = new THREE.Group();
+      while (gltf.scene.children.length > 0) {
+        group.add(gltf.scene.children[0]);
+      }
+      position && group.position.copy(position);
+      scale && group.scale.copy(scale);
+      this.addMesh(group);
+      this.meshList.set(id, group);
     }, () => {
       console.log("progress");
-    }, () => {
-      console.log("error");
+    }, (error) => {
+      console.log("error", error);
     });
   }
 
@@ -239,6 +260,13 @@ export class GenerateObject {
   generateStats() {
     this.stats = new Stats();
     document.body.appendChild(this.stats.domElement);
+  }
+
+  updateMixerList(delta, id) {
+    if (id) return this.mixerList.get(id).update(delta);
+    this.mixerList.forEach(mixer => {
+      mixer.update(delta);
+    })
   }
 
   updateMeshPhysics(id) {
