@@ -89,7 +89,7 @@ export class GenerateObject {
     })
   }
 
-  async generateModelGltf({id, url, position, scale, type}) {
+  async generateModelGltf({id, url, position, scale, type, animationIndex}) {
     const gltfLoader = new GLTFLoader();
     if (type === "draco") {
       const dracoLoader = new DRACOLoader();
@@ -97,9 +97,9 @@ export class GenerateObject {
       gltfLoader.setDRACOLoader(dracoLoader);
     }
     gltfLoader.load(url, (gltf) => {
-      if (gltf.animations.length > 0) {
+      if (gltf.animations.length > 0 && gltf.animations.length - 1 >= animationIndex) {
         const mixer = new THREE.AnimationMixer(gltf.scene);
-        const action = mixer.clipAction(gltf.animations[1]);
+        const action = mixer.clipAction(gltf.animations[animationIndex]);
         action.play();
         this.mixerList.set(id, mixer);
       }
@@ -262,11 +262,10 @@ export class GenerateObject {
     document.body.appendChild(this.stats.domElement);
   }
 
-  updateMixerList(delta, id) {
-    if (id) return this.mixerList.get(id).update(delta);
+  updateMixerList(delta) {
     this.mixerList.forEach(mixer => {
       mixer.update(delta);
-    })
+    });
   }
 
   updateMeshPhysics(id) {

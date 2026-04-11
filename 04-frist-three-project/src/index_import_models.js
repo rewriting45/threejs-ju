@@ -180,11 +180,62 @@ const threeGlobal = new GenerateObject(THREE, canvas, {
                 x: 0.025,
                 y: 0.025,
                 z: 0.025
-            }
+            },
+            animationIndex: 0,
+        },
+        {
+            id: "fox_02",
+            url: "/models/Fox/glTF/Fox.gltf",
+            type: "gltf",
+            position: {
+                x: -12,
+                y: 0,
+                z: 5
+            },
+            scale:{
+                x: 0.025,
+                y: 0.025,
+                z: 0.025
+            },
+            animationIndex: 1,
+        },
+        {
+            id: "fox_03",
+            url: "/models/Fox/glTF/Fox.gltf",
+            type: "gltf",
+            position: {
+                x: -14,
+                y: 0,
+                z: 5
+            },
+            scale:{
+                x: 0.025,
+                y: 0.025,
+                z: 0.025
+            },
+            animationIndex: 2,
+        },
+        {
+            id: "fox_04",
+            url: "/models/Fox/glTF/Fox.gltf",
+            type: "gltf",
+            position: {
+                x: -16,
+                y: 0,
+                z: 5
+            },
+            scale:{
+                x: 0.025,
+                y: 0.025,
+                z: 0.025
+            },
+            animationIndex: 3,
         }
     ],
     controls: true
 });
+
+let speed = 0.1;
 
 const clock = new THREE.Clock();
 let oldElapsedTime = 0;
@@ -194,6 +245,17 @@ function animation() {
     const elapsedTime = clock.getElapsedTime();
     const delta = elapsedTime - oldElapsedTime;
     oldElapsedTime = elapsedTime;
+    // threeGlobal.updateMixerList(delta);
+
+    const fox_02 = threeGlobal.getAllMesh("fox_02");
+    const fox_03 = threeGlobal.getAllMesh("fox_03");
+    if (fox_02) {
+        fox_02.position.z += speed;
+    }
+    if (fox_03) {
+        fox_03.position.z += speed * 2;
+    }
+
     threeGlobal.updateMixerList(delta);
     threeGlobal.update();
     requestAnimationFrame(animation);
