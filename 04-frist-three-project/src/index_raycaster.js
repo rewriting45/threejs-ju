@@ -32,7 +32,7 @@ const threeGlobal = new GenerateObject(THREE, canvas, {
         {
             id: "meshes_01",
             params: {
-                geometryId: "geometry_box_01",
+                geometryId: "geometry_sphere_01",
                 materialId: "material_standard_01"
             },
             position: [0, 0, 0],
@@ -50,10 +50,10 @@ const threeGlobal = new GenerateObject(THREE, canvas, {
         {
             id: "meshes_03",
             params: {
-                geometryId: "geometry_torus_01",
+                geometryId: "geometry_sphere_01",
                 materialId: "material_standard_01"
             },
-            position: [-5, 0, 0],
+            position: [-1, 0, 0],
             rotation: [0, 0, 0]
         },
         {
@@ -62,7 +62,7 @@ const threeGlobal = new GenerateObject(THREE, canvas, {
                 geometryId: "geometry_sphere_01",
                 materialId: "material_standard_01"
             },
-            position: [5, 0, 0],
+            position: [1, 0, 0],
             rotation: [0, 0, 0]
         }
     ],
@@ -103,14 +103,81 @@ const threeGlobal = new GenerateObject(THREE, canvas, {
             id: 'geometry_sphere_01',
             type: 'sphere',
             config: {
-                radius: 1.5,
+                radius: 0.5,
             }
         }
+    ],
+    models: [
+        {
+            id: "duck_01",
+            url: "/models/Duck/glTF/Duck.gltf",
+            type: "gltf",
+            position: {
+                x: 3,
+                y: 0,
+                z: 0
+            }
+        },
     ],
     controls: true
 });
 
+threeGlobal.generateRayCaster([-3, 0, 0], [10, 0, 0]);
+
+const meshes = threeGlobal.getMeshByIds(["meshes_01", "meshes_02", "meshes_03", "meshes_04"]);
+meshes.forEach(mesh => {
+    mesh.material = mesh.material.clone();
+})
+
+const mouse = new THREE.Vector2();
+let currentIntersect = null;
+window.addEventListener("mousemove", ({clientX, clientY}) => {
+    mouse.x = clientX / canvas.clientWidth * 2 - 1;
+    mouse.y = - (clientY / canvas.clientHeight) * 2 + 1;
+})
+
+window.addEventListener("click", () => {
+    console.log(currentIntersect.object);
+})
+
+const clock = new THREE.Clock();
 function animation() {
+
+    const elapsedTime = clock.getElapsedTime();
+
+    threeGlobal.setRayFromCamera(mouse, "camera_perspective_01");
+
+    meshes[0].position.y = Math.sin(elapsedTime * 0.3) * 1.5;
+    meshes[2].position.y = Math.sin(elapsedTime * 0.8) * 1.5;
+    meshes[3].position.y = Math.sin(elapsedTime * 1.4) * 1.5;
+
+    meshes.forEach(mesh => {
+        mesh.material.color.set("#ff0000")
+    })
+
+    const intersects = threeGlobal.rayIntersect(["meshes_01", "meshes_03", "meshes_04"]);
+
+    for (let intersect of intersects) {
+        intersect.object.material.color.set("#0000ff")
+    }
+
+    if (intersects.length > 0) {
+        if (!currentIntersect) {
+            currentIntersect = intersects[0]
+        }
+    } else {
+        currentIntersect = null;
+    }
+
+    const duck = threeGlobal.getAllMesh("duck_01");
+    if (duck) {
+        const object = threeGlobal.rayIntersectObject(duck);
+        if (object.length > 0) {
+            duck.scale.set(1.2, 1.2, 1.2);
+        } else {
+            duck.scale.set(1, 1, 1);
+        }
+    }
 
     threeGlobal.update();
     requestAnimationFrame(animation);

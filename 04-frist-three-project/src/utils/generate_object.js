@@ -43,6 +43,9 @@ export class GenerateObject {
   // region current camera
   currentCamera = null;
   // endregion
+  // region rayCaster
+  rayCaster = null;
+  // endregion
   constructor(THREE, canvas,{materials, geometries, meshes, cameras, lights, fogs, axesHelper,basicPhysics, controls, physics, audios, models}) {
     this.canvas = canvas;
     this.generateScene();
@@ -62,7 +65,7 @@ export class GenerateObject {
     audios && this.generateAudioList(audios);
     physics && this.generateWorldMeshes(physics);
     axesHelper && this.addAxesHelper(1000);
-    materials && this.generateMaterial(materials);
+    materials && this.generateMaterials(materials);
     geometries && this.generateGeometries(geometries);
     meshes && this.generateMeshes(meshes);
     fogs && this.generateFog(fogs);
@@ -87,6 +90,28 @@ export class GenerateObject {
     models.forEach(model => {
       this.generateModelGltf(model);
     })
+  }
+
+  generateRayCaster(origin, direction) {
+    if (this.rayCaster) return;
+    const rayOrigin = new THREE.Vector3(...origin);
+    const rayDirection = new THREE.Vector3(...direction);
+    rayDirection.normalize();
+    this.rayCaster = new THREE.Raycaster(rayOrigin, rayDirection);
+  }
+
+  rayIntersect(ids) {
+    const intersectObjects = this.rayCaster.intersectObjects(this.getMeshByIds(ids));
+    return intersectObjects;
+  }
+
+  rayIntersectObject(object) {
+    const intersectObjects = this.rayCaster.intersectObjects([object]);
+    return intersectObjects;
+  }
+
+  setRayFromCamera(mouse, cameraId) {
+    this.rayCaster.setFromCamera(mouse, this.getAllCamera(cameraId));
   }
 
   async generateModelGltf({id, url, position, scale, type, animationIndex}) {
@@ -119,10 +144,16 @@ export class GenerateObject {
     });
   }
 
-  generateMaterial(materials) {
-    materials.forEach(({id, type, config}) => {
-      this.materialList.set(id, this.materialFactory.generate(type, config))
+  generateMaterials(materials) {
+    materials.forEach((material) => {
+      this.generateMaterial(material);
     })
+  }
+
+  generateMaterial({id, type, config}) {
+    const material = this.materialFactory.generate(type, config)
+    this.materialList.set(id, material);
+    return material;
   }
 
   generateGeometry({id, type, config}) {
@@ -316,6 +347,12 @@ export class GenerateObject {
 
   getAllMesh(id) {
     return id ? this.meshList.get(id) : this.meshList;
+  }
+
+  getMeshByIds(ids) {
+    return ids.map((id) => {
+      return this.getAllMesh(id);
+    })
   }
 
   getAllLight(id) {
