@@ -58,6 +58,12 @@ export class GenerateObject {
     this.fogFactory = new GenerateFog(THREE);
     this.worldFactory = new GeneratePhysics(basicPhysics);
 
+    this.manager = new THREE.LoadingManager();
+    this.manager.onLoad = () => {
+      console.log("load");
+      this.updateAllMaterialsEnvMapIntensity();
+    }
+
     this.generateStats();
 
     this.generateCamera(cameras);
@@ -74,6 +80,8 @@ export class GenerateObject {
 
     this.generateRender(canvas);
     this.resizeRender(canvas);
+
+
 
     controls && this.generateControls();
   }
@@ -115,7 +123,7 @@ export class GenerateObject {
   }
 
   async generateModelGltf({id, url, position, scale, type, animationIndex}) {
-    const gltfLoader = new GLTFLoader();
+    const gltfLoader = new GLTFLoader(this.manager);
     if (type === "draco") {
       const dracoLoader = new DRACOLoader();
       dracoLoader.setDecoderPath("/draco/");
@@ -291,6 +299,16 @@ export class GenerateObject {
   generateStats() {
     this.stats = new Stats();
     document.body.appendChild(this.stats.domElement);
+  }
+
+  updateAllMaterialsEnvMapIntensity(intensity = 10) {
+    this.scene.traverse(child => {
+      if (child.isMesh && child.material instanceof THREE.MeshStandardMaterial) {
+        console.log(child);
+        child.material.envMapIntensity = intensity;
+        child.material.needsUpdate = true;
+      }
+    })
   }
 
   updateMixerList(delta) {

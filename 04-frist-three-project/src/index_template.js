@@ -19,14 +19,14 @@ const threeGlobal = new GenerateObject(THREE, canvas, {
     ],
     lights: [
         {
-            id: "light_point_01",
-            type: 'point',
+            id: "light_ambient_01",
+            type: 'ambient',
             params: {
                 color: 0xffffff,
-                intensity: 100,
+                intensity: 1,
             },
-            position: [10, 10, 10],
-        }
+            position: [10, -10, 10],
+        },
     ],
     meshes: [
         {
