@@ -1,5 +1,8 @@
 import * as THREE from 'three';
 import {GenerateObject} from '@/utils/generate_object';
+import {GUI} from 'dat.gui';
+
+const gui = new GUI();
 
 const canvas = document.querySelector('canvas');
 const threeGlobal = new GenerateObject(THREE, canvas, {
