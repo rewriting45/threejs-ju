@@ -304,7 +304,6 @@ export class GenerateObject {
   updateAllMaterialsEnvMapIntensity(intensity = 10) {
     this.scene.traverse(child => {
       if (child.isMesh && child.material instanceof THREE.MeshStandardMaterial) {
-        console.log(child);
         child.material.envMapIntensity = intensity;
         child.material.needsUpdate = true;
       }
