@@ -1,4 +1,6 @@
-import path from "path";
+import { fileURLToPath, URL } from 'node:url';
+import glsl from 'vite-plugin-glsl';
+
 
 export default {
   root: "./",
@@ -6,7 +8,7 @@ export default {
   base: "./",
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "src"),
+      '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
   build: {
@@ -22,4 +24,7 @@ export default {
       host: "localhost",
     },
   },
+  plugins: [
+    glsl()
+  ]
 };
