@@ -13,7 +13,7 @@ import {mix} from "three/tsl";
 
 
 
-export class GenerateObject {
+export class GenerateObject extends EventTarget{
   scene = null;
   canvas = null;
   renderer = null;
@@ -47,6 +47,7 @@ export class GenerateObject {
   rayCaster = null;
   // endregion
   constructor(THREE, canvas,{materials, geometries, meshes, cameras, lights, fogs, axesHelper,basicPhysics, controls, physics, audios, models}) {
+    super();
     this.canvas = canvas;
     this.generateScene();
 
@@ -57,6 +58,13 @@ export class GenerateObject {
     this.lightFactory = new GenerateLight(THREE);
     this.fogFactory = new GenerateFog(THREE);
     this.worldFactory = new GeneratePhysics(basicPhysics);
+
+    this.manager = new THREE.LoadingManager();
+    this.manager.onLoad = () => {
+      console.log("loading");
+      this.doSomething();
+      this.updateAllMaterialsEnvMapIntensity();
+    }
 
     this.generateStats();
 
@@ -76,6 +84,15 @@ export class GenerateObject {
     this.resizeRender(canvas);
 
     controls && this.generateControls();
+  }
+
+  doSomething() {
+    // 任务完成后，触发一个自定义事件
+    // 注意：必须使用 CustomEvent，并且数据要放在 detail 属性中
+    const event = new CustomEvent('models-loaded', {
+      detail: { status: 'success', message: '任务完成啦！' }
+    });
+    this.dispatchEvent(event);
   }
 
   addAxesHelper(size = 10) {
@@ -115,7 +132,7 @@ export class GenerateObject {
   }
 
   async generateModelGltf({id, url, position, scale, type, animationIndex}) {
-    const gltfLoader = new GLTFLoader();
+    const gltfLoader = new GLTFLoader(this.manager);
     if (type === "draco") {
       const dracoLoader = new DRACOLoader();
       dracoLoader.setDecoderPath("/draco/");
@@ -129,14 +146,16 @@ export class GenerateObject {
         this.mixerList.set(id, mixer);
       }
       // 因为每移动一个mesh，他就会从之前的scene移除
-      const group = new THREE.Group();
-      while (gltf.scene.children.length > 0) {
-        group.add(gltf.scene.children[0]);
-      }
-      position && group.position.copy(position);
-      scale && group.scale.copy(scale);
-      this.addMesh(group);
-      this.meshList.set(id, group);
+      // const group = new THREE.Group();
+      // while (gltf.scene.children.length > 0) {
+      //   group.add(gltf.scene.children[0]);
+      // }
+      // position && group.position.copy(position);
+      // scale && group.scale.copy(scale);
+      position && gltf.scene.position.copy(position);
+      scale && gltf.scene.scale.copy(scale);
+      this.addMesh(gltf.scene);
+      this.meshList.set(id, gltf.scene);
     }, () => {
       console.log("progress");
     }, (error) => {
@@ -291,6 +310,23 @@ export class GenerateObject {
   generateStats() {
     this.stats = new Stats();
     document.body.appendChild(this.stats.domElement);
+  }
+
+  updateAllMaterialsEnvMapIntensity(intensity = 10) {
+    this.scene.traverse(child => {
+      if (child.isMesh && child.material instanceof THREE.MeshStandardMaterial) {
+        child.material.envMapIntensity = intensity;
+        child.material.needsUpdate = true;
+      }
+    })
+  }
+
+  updateAllMaterialsEnvMap(material) {
+    this.scene.traverse(child => {
+      if (child.isMesh && child.material instanceof THREE.MeshStandardMaterial) {
+        child.material.envMap = material;
+      }
+    })
   }
 
   updateMixerList(delta) {
