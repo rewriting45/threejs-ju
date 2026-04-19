@@ -43,6 +43,9 @@ export class GenerateMaterial {
     rawShader: {
       createFn: "RawShaderMaterial",
     },
+    shader: {
+      createFn: "ShaderMaterial",
+    },
   };
   constructor(THREE) {
     this.THREE = THREE;

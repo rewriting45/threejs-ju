@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 import {GenerateObject} from '@/utils/generate_object';
 import {GUI} from 'dat.gui';
-import vertexShader from "@/shaders/27-shader/vertex.glsl";
-import fragmentShader from "@/shaders/27-shader/fragment.glsl";
+import vertexShader from "@/shaders/28-shader-patterns/vertex.glsl";
+import fragmentShader from "@/shaders/28-shader-patterns/fragment.glsl";
 
 const gui = new GUI();
 
@@ -96,8 +96,8 @@ for (let i = 0; i < materialCount.length; i++) {
 geometry_plane_01.setAttribute("aRandom", new THREE.BufferAttribute(materialCount, 1));
 
 const rawShaderMaterial = threeGlobal.generateMaterial({
-    id: "raw-shader",
-    type: "rawShader",
+    id: "shader",
+    type: "shader",
     config: {
         vertexShader, // 顶点着色器
         fragmentShader, // 片元着色器
@@ -119,7 +119,7 @@ const mesh = threeGlobal.generateMesh({
     id: "meshes_05",
     params: {
         geometryId: "geometry_plane_01",
-        materialId: "raw-shader"
+        materialId: "shader"
     },
 });
 
