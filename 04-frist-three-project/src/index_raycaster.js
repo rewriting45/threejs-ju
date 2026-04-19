@@ -26,6 +26,17 @@ const threeGlobal = new GenerateObject(THREE, canvas, {
                 intensity: 100,
             },
             position: [10, 10, 10],
+        },
+        {
+            id: "light_spot_01",
+            type: 'spot',
+            params: {
+                color: 0x00ff00,
+                intensity: 500,
+                distance: 100,
+                angle:0.5
+            },
+            position: [10, 10, 10],
         }
     ],
     meshes: [
@@ -173,7 +184,7 @@ function animation() {
     if (duck) {
         const object = threeGlobal.rayIntersectObject(duck);
         if (object.length > 0) {
-            duck.scale.set(1.2, 1.2, 1.2);
+            duck.scale.set(10, 10, 10);
         } else {
             duck.scale.set(1, 1, 1);
         }
