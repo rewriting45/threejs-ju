@@ -3,13 +3,6 @@ import {GenerateObject} from '@/utils/generate_object';
 import {GUI} from 'dat.gui';
 import vertexShader from "@/shaders/28-shader-patterns/vertex.glsl";
 import fragmentShader from "@/shaders/28-shader-patterns/fragment.glsl";
-import fragment01Shader from "@/shaders/28-shader-patterns/fragment01.glsl";
-import fragment02Shader from "@/shaders/28-shader-patterns/fragment02.glsl";
-import fragment03Shader from "@/shaders/28-shader-patterns/fragment03.glsl";
-import fragment04Shader from "@/shaders/28-shader-patterns/fragment04.glsl";
-import fragment05Shader from "@/shaders/28-shader-patterns/fragment05.glsl";
-import fragment06Shader from "@/shaders/28-shader-patterns/fragment06.glsl";
-import fragment07Shader from "@/shaders/28-shader-patterns/fragment07.glsl";
 
 const gui = new GUI();
 
@@ -29,7 +22,7 @@ const threeGlobal = new GenerateObject(THREE, canvas, {
                 near: 0.01,
                 far: 1000,
             },
-            position: [0, 0, 30]
+            position: [0, 0, 10]
         }
     ],
     lights: [
@@ -115,125 +108,10 @@ const shaderMaterial = threeGlobal.generateMaterial({
             },
             fTexture: {
                 value: flagTexture
-            }
-        }
-    }
-});
-
-threeGlobal.generateMaterial({
-    id: "shader_01",
-    type: "shader",
-    config: {
-        vertexShader, // 顶点着色器
-        fragmentShader: fragment01Shader, // 片元着色器
-        side: THREE.DoubleSide,
-        uniforms: {
-            uTime: {
-                value: 0,
             },
-            fTexture: {
-                value: flagTexture
+            uCurrent: {
+                value: 22
             }
-        }
-    }
-});
-
-threeGlobal.generateMaterial({
-    id: "shader_02",
-    type: "shader",
-    config: {
-        vertexShader, // 顶点着色器
-        fragmentShader: fragment02Shader, // 片元着色器
-        side: THREE.DoubleSide,
-        uniforms: {
-            uTime: {
-                value: 0,
-            },
-            fTexture: {
-                value: flagTexture
-            }
-        }
-    }
-});
-threeGlobal.generateMaterial({
-    id: "shader_03",
-    type: "shader",
-    config: {
-        vertexShader, // 顶点着色器
-        fragmentShader: fragment03Shader, // 片元着色器
-        side: THREE.DoubleSide,
-        uniforms: {
-            uTime: {
-                value: 0,
-            },
-            fTexture: {
-                value: flagTexture
-            }
-        }
-    }
-});
-threeGlobal.generateMaterial({
-    id: "shader_04",
-    type: "shader",
-    config: {
-        vertexShader, // 顶点着色器
-        fragmentShader: fragment04Shader, // 片元着色器
-        side: THREE.DoubleSide,
-        uniforms: {
-            uTime: {
-                value: 0,
-            },
-            fTexture: {
-                value: flagTexture
-            }
-        }
-    }
-});
-threeGlobal.generateMaterial({
-    id: "shader_05",
-    type: "shader",
-    config: {
-        vertexShader, // 顶点着色器
-        fragmentShader: fragment05Shader, // 片元着色器
-        side: THREE.DoubleSide,
-        uniforms: {
-            uTime: {
-                value: 0,
-            },
-            fTexture: {
-                value: flagTexture
-            }
-        }
-    }
-});
-threeGlobal.generateMaterial({
-    id: "shader_06",
-    type: "shader",
-    config: {
-        vertexShader, // 顶点着色器
-        fragmentShader: fragment06Shader, // 片元着色器
-        side: THREE.DoubleSide,
-        uniforms: {
-            uTime: {
-                value: 0,
-            },
-            fTexture: {
-                value: flagTexture
-            }
-        }
-    }
-});
-const shader_07 = threeGlobal.generateMaterial({
-    id: "shader_07",
-    type: "shader",
-    config: {
-        vertexShader, // 顶点着色器
-        fragmentShader: fragment07Shader, // 片元着色器
-        side: THREE.DoubleSide,
-        uniforms: {
-            uStep: {
-                value: 0.5,
-            },
         }
     }
 });
@@ -246,75 +124,14 @@ const mesh = threeGlobal.generateMesh({
     },
 });
 
-const mesh_01 = threeGlobal.generateMesh({
-    id: "meshes_01",
-    params: {
-        geometryId: "geometry_plane_01",
-        materialId: "shader_01"
-    },
-});
-
-const mesh_02 = threeGlobal.generateMesh({
-    id: "meshes_02",
-    params: {
-        geometryId: "geometry_plane_01",
-        materialId: "shader_02"
-    },
-});
-const mesh_03 = threeGlobal.generateMesh({
-    id: "meshes_03",
-    params: {
-        geometryId: "geometry_plane_01",
-        materialId: "shader_03"
-    },
-});
-const mesh_04 = threeGlobal.generateMesh({
-    id: "meshes_04",
-    params: {
-        geometryId: "geometry_plane_01",
-        materialId: "shader_04"
-    },
-});
-const mesh_05 = threeGlobal.generateMesh({
-    id: "meshes_05",
-    params: {
-        geometryId: "geometry_plane_01",
-        materialId: "shader_05"
-    },
-});
-const mesh_06 = threeGlobal.generateMesh({
-    id: "meshes_06",
-    params: {
-        geometryId: "geometry_plane_01",
-        materialId: "shader_06"
-    },
-});
-const mesh_07 = threeGlobal.generateMesh({
-    id: "meshes_07",
-    params: {
-        geometryId: "geometry_plane_01",
-        materialId: "shader_07"
-    },
-});
-
-mesh_01.position.x = -6;
-mesh_02.position.x = -12;
-mesh_03.position.x = -18;
-mesh_04.position.x = -24;
-mesh_05.position.x = -30;
-mesh_06.position.x = -36;
-mesh_07.position.x = -42;
-
 threeGlobal.addMesh(mesh);
-threeGlobal.addMesh(mesh_01);
-threeGlobal.addMesh(mesh_02);
-threeGlobal.addMesh(mesh_03);
-threeGlobal.addMesh(mesh_04);
-threeGlobal.addMesh(mesh_05);
-threeGlobal.addMesh(mesh_06);
-threeGlobal.addMesh(mesh_07);
 
-gui.add(mesh_07.material.uniforms.uStep, "value").min(0.1).max(1.0).step(0.1).name("shader07");
+const shaderMap = {};
+for (let i = 1; i < 100; i++) {
+    shaderMap[`shader${i}`] = i;
+}
+
+gui.add(mesh.material.uniforms.uCurrent, "value", shaderMap).name("shader");
 
 const clock = new THREE.Clock();
 function animation() {
